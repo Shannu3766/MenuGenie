@@ -178,6 +178,8 @@ def add_section(request, menu_id):
         if form.is_valid():
             section = form.save(commit=False)
             section.menu = menu_link
+            # Capitalize the section name
+            section.name = section.name.upper()
             section.save()
             messages.success(request, 'Section added successfully!')
         else:
