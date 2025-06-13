@@ -154,3 +154,6 @@ LOGGING = {
         },
     },
 }
+
+# Google API Key for Gemini
+GOOGLE_API_KEY = 'AIzaSyA6vLseI5Aq3Fhgua8qPF_yGq-qj4o6mfk'  # Replace with your actual key

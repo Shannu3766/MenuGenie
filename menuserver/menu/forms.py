@@ -17,4 +17,10 @@ class MenuSectionForm(forms.ModelForm):
         fields = ['name']
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'Enter section name'}),
-        } 
+        }
+
+class MenuUploadForm(forms.Form):
+    menu_image = forms.ImageField(
+        label='Upload Menu Image',
+        help_text='Upload an image of your menu to automatically extract items and sections.'
+    ) 

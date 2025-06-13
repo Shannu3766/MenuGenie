@@ -4,7 +4,11 @@ from django.contrib import messages
 from django.db import IntegrityError
 from django.http import JsonResponse
 from .models import MenuLink, MenuItem, MenuSection
-from .forms import MenuItemForm, MenuSectionForm
+from .forms import MenuItemForm, MenuSectionForm, MenuUploadForm
+from .utils import extract_menu_data
+import os
+from django.conf import settings
+import json
 
 # Create your views here.
 
@@ -65,7 +69,83 @@ def manage_menu(request, menu_id):
     # Get unsectioned items
     unsectioned_items = menu_items.filter(section__isnull=True)
     
-    if request.method == 'POST':
+    # Handle menu upload
+    if request.method == 'POST' and 'menu_image' in request.FILES:
+        upload_form = MenuUploadForm(request.POST, request.FILES)
+        if upload_form.is_valid():
+            menu_image = request.FILES['menu_image']
+            print(f"Processing uploaded image: {menu_image.name}")
+            
+            # Save the uploaded image temporarily
+            temp_path = os.path.join(settings.MEDIA_ROOT, 'temp', menu_image.name)
+            os.makedirs(os.path.dirname(temp_path), exist_ok=True)
+            print(f"Saving image to: {temp_path}")
+            
+            with open(temp_path, 'wb+') as destination:
+                for chunk in menu_image.chunks():
+                    destination.write(chunk)
+            
+            print("Image saved successfully, extracting menu data...")
+            # Extract menu data
+            menu_data = extract_menu_data(temp_path)
+            
+            if menu_data:
+                print(f"Successfully extracted menu data: {json.dumps(menu_data, indent=2)}")
+                try:
+                    # Process each section and its items
+                    for section_data in menu_data:
+                        print(f"Processing section: {section_data['section']}")
+                        # Create or get section
+                        section, created = MenuSection.objects.get_or_create(
+                            menu=menu_link,
+                            name=section_data['section']
+                        )
+                        print(f"Section {'created' if created else 'already exists'}")
+                        
+                        # Create items for this section
+                        for item_data in section_data['items']:
+                            print(f"Processing item: {item_data['item']}")
+                            # Extract price (remove currency symbols and convert to float)
+                            price_str = item_data['price'].replace('₹', '').replace('$', '').strip()
+                            try:
+                                price = float(price_str)
+                                print(f"Parsed price: {price}")
+                            except ValueError:
+                                print(f"Could not parse price: {item_data['price']}")
+                                price = 0.0
+                            
+                            # Create menu item
+                            MenuItem.objects.create(
+                                menu=menu_link,
+                                section=section,
+                                name=item_data['item'],
+                                price=price,
+                                quantity=1,  # Set default quantity to 1
+                                is_available=True
+                            )
+                            print(f"Created menu item: {item_data['item']}")
+                    
+                    messages.success(request, 'Menu items extracted and added successfully!')
+                except Exception as e:
+                    print(f"Error processing menu data: {str(e)}")
+                    messages.error(request, f'Error processing menu data: {str(e)}')
+            else:
+                print("Failed to extract menu data from image")
+                messages.error(request, 'Failed to extract menu data from the image.')
+            
+            # Clean up temporary file
+            try:
+                os.remove(temp_path)
+                print("Temporary file cleaned up")
+            except Exception as e:
+                print(f"Error cleaning up temporary file: {str(e)}")
+            
+            return redirect('menu:manage_menu', menu_id=menu_id)
+    else:
+        upload_form = MenuUploadForm()
+    
+    # Handle regular menu item form
+    if request.method == 'POST' and 'name' in request.POST:
         form = MenuItemForm(request.POST, request.FILES)
         if form.is_valid():
             menu_item = form.save(commit=False)
@@ -83,6 +163,7 @@ def manage_menu(request, menu_id):
         'menu_link': menu_link,
         'form': form,
         'section_form': section_form,
+        'upload_form': upload_form,
         'sections': sections,
         'menu_items': menu_items,
         'unsectioned_items': unsectioned_items,
@@ -151,10 +232,67 @@ def edit_menu_item(request, menu_id, item_id):
 
 def public_menu(request, user_id, restaurant_name):
     menu_link = get_object_or_404(MenuLink, user_id=user_id, restaurant_name=restaurant_name)
-    menu_items = MenuItem.objects.filter(menu=menu_link, is_available=True).order_by('name')
+    
+    # Get all sections with their items
+    sections = []
+    for section in MenuSection.objects.filter(menu=menu_link).order_by('name'):
+        items = MenuItem.objects.filter(
+            menu=menu_link,
+            section=section,
+            is_available=True
+        ).order_by('name')
+        if items.exists():
+            sections.append({
+                'name': section.name,
+                'items': items
+            })
+    
+    # Get unsectioned items
+    unsectioned_items = MenuItem.objects.filter(
+        menu=menu_link,
+        section__isnull=True,
+        is_available=True
+    ).order_by('name')
     
     context = {
         'menu_link': menu_link,
-        'menu_items': menu_items,
+        'sections': sections,
+        'unsectioned_items': unsectioned_items,
     }
     return render(request, 'menu/public_menu.html', context)
+
+@login_required
+def delete_section(request, menu_id, section_id):
+    if request.method == 'POST':
+        menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+        section = get_object_or_404(MenuSection, id=section_id, menu=menu_link)
+        
+        # Get all items in this section
+        items = MenuItem.objects.filter(section=section)
+        
+        # Delete all items in the section
+        items.delete()
+        
+        # Delete the section
+        section.delete()
+        
+        messages.success(request, 'Section and all its items deleted successfully!')
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+@login_required
+def toggle_section_availability(request, menu_id, section_id):
+    if request.method == 'POST':
+        menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+        section = get_object_or_404(MenuSection, id=section_id, menu=menu_link)
+        action = request.POST.get('action', 'available')
+        
+        # Update all items in the section
+        MenuItem.objects.filter(menu=menu_link, section=section).update(
+            is_available=(action == 'available')
+        )
+        
+        status = 'available' if action == 'available' else 'unavailable'
+        messages.success(request, f'All items in section "{section.name}" are now {status}!')
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)

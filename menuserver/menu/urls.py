@@ -10,9 +10,11 @@ admin_urlpatterns = [
     path('import-restaurant/', views.import_restaurant, name='import_restaurant'),
     path('manage-menu/<int:menu_id>/', views.manage_menu, name='manage_menu'),
     path('manage-menu/<int:menu_id>/add-section/', views.add_section, name='add_section'),
-    path('manage-menu/<int:menu_id>/edit-item/<int:item_id>/', views.edit_menu_item, name='edit_item'),
+    path('manage-menu/<int:menu_id>/delete-section/<int:section_id>/', views.delete_section, name='delete_section'),
     path('manage-menu/<int:menu_id>/delete-item/<int:item_id>/', views.delete_menu_item, name='delete_item'),
     path('manage-menu/<int:menu_id>/toggle-availability/<int:item_id>/', views.toggle_availability, name='toggle_availability'),
+    path('manage-menu/<int:menu_id>/toggle-section-availability/<int:section_id>/', views.toggle_section_availability, name='toggle_section_availability'),
+    path('manage-menu/<int:menu_id>/edit-item/<int:item_id>/', views.edit_menu_item, name='edit_item'),
 ]
 
 # Public URLs (no prefix)
