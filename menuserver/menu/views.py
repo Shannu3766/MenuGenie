@@ -10,6 +10,9 @@ from .forms import MenuItemForm
 
 @login_required
 def my_restaurants(request):
+    if not request.user.is_restaurant_owner:
+        messages.error(request, 'You must be a restaurant owner to access this page.')
+        return redirect('home')
     menu_links = MenuLink.objects.filter(user=request.user)
     return render(request, 'menu/my_restaurants.html', {
         'menu_links': menu_links

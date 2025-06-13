@@ -7,8 +7,14 @@ from django.contrib import messages
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.db.models import Q
-from .forms import CustomUserCreationForm, CustomAuthenticationForm
-from .models import CustomUser
+from .forms import CustomUserCreationForm, CustomAuthenticationForm, UserProfileForm
+from .models import CustomUser, RegistrationData
+from django.http import JsonResponse
+from .utils import send_verification_email
+from django.contrib.auth.hashers import make_password
+from django.core.mail import send_mail
+from django.conf import settings
+from django.utils import timezone
 
 def register_step1(request):
     if request.method == 'POST':
@@ -91,37 +97,47 @@ def register_step4(request):
         address = request.POST.get('address', '')
         is_restaurant_owner = request.POST.get('is_restaurant_owner') == 'on'
         
-        # Validate phone number if provided
-        if phone_number and (not phone_number.isdigit() or len(phone_number) != 10):
-            messages.error(request, 'Please enter a valid 10-digit phone number.')
-            return render(request, 'accounts/register_step4.html', {
-                'email': request.session['registration_email'],
-                'username': request.session['registration_username'],
-                'password1': request.session['registration_password'],
-                'password2': request.session['registration_password']
-            })
-        
         try:
-            # Create the user with all information
-            user = CustomUser.objects.create_user(
-                username=request.session['registration_username'],
+            # Delete any existing registration data for this email
+            RegistrationData.objects.filter(email=request.session['registration_email']).delete()
+            
+            # Create new registration data
+            registration = RegistrationData.objects.create(
                 email=request.session['registration_email'],
-                password=request.session['registration_password'],
+                username=request.session['registration_username'],
+                password=make_password(request.session['registration_password']),
                 phone_number=phone_number,
                 address=address,
                 is_restaurant_owner=is_restaurant_owner
             )
             
+            # Generate and set verification token
+            registration.set_verification_token()
+            
+            # Send verification email
+            try:
+                send_verification_email(registration)
+            except Exception as email_error:
+                print(f"Email sending error: {str(email_error)}")
+                registration.delete()  # Clean up if email fails
+                messages.error(request, f'Failed to send verification email: {str(email_error)}')
+                return render(request, 'accounts/register_step4.html', {
+                    'email': request.session['registration_email'],
+                    'username': request.session['registration_username'],
+                    'password1': request.session['registration_password'],
+                    'password2': request.session['registration_password']
+                })
+            
             # Clear all registration session data
             for key in required_session_keys:
                 del request.session[key]
             
-            # Log the user in
-            login(request, user)
-            messages.success(request, 'Registration successful! Welcome to Menu Server.')
-            return redirect('home')
+            messages.success(request, 'Registration initiated! Please check your email to verify your account.')
+            return redirect('accounts:verify_email_pending', registration_id=registration.id)
+            
         except Exception as e:
-            messages.error(request, 'An error occurred during registration. Please try again.')
+            print(f"Registration error: {str(e)}")  # Add this line for debugging
+            messages.error(request, f'An error occurred during registration: {str(e)}')
             return render(request, 'accounts/register_step4.html', {
                 'email': request.session['registration_email'],
                 'username': request.session['registration_username'],
@@ -135,6 +151,67 @@ def register_step4(request):
         'password1': request.session['registration_password'],
         'password2': request.session['registration_password']
     })
+
+def verify_email_pending(request, registration_id):
+    try:
+        registration = RegistrationData.objects.get(id=registration_id)
+    except RegistrationData.DoesNotExist:
+        messages.error(request, 'Invalid registration data.')
+        return redirect('accounts:register_step1')
+    
+    if request.method == 'POST':
+        otp = request.POST.get('otp')
+        if not otp:
+            messages.error(request, 'Please enter the verification code.')
+            return render(request, 'accounts/verify_email_pending.html', {'registration': registration})
+        
+        if registration.is_token_expired():
+            messages.error(request, 'Verification code has expired. Please register again.')
+            registration.delete()
+            return redirect('accounts:register_step1')
+        
+        if otp == registration.email_verification_token:
+            # Create the user
+            user = CustomUser.objects.create_user(
+                username=registration.username,
+                email=registration.email,
+                password=registration.password,
+                phone_number=registration.phone_number,
+                address=registration.address,
+                is_restaurant_owner=registration.is_restaurant_owner,
+                email_verified=True  # Email is already verified
+            )
+            
+            # Delete the registration data
+            registration.delete()
+            
+            # Log the user in
+            login(request, user)
+            messages.success(request, 'Email verified successfully! You can now use your account.')
+            return redirect('home')
+        else:
+            messages.error(request, 'Invalid verification code.')
+    
+    return render(request, 'accounts/verify_email_pending.html', {'registration': registration})
+
+@login_required
+def resend_verification(request):
+    if request.method == 'POST':
+        verification_type = request.GET.get('type')
+        registration_id = request.GET.get('id')
+        
+        try:
+            if verification_type == 'email' and registration_id:
+                registration = RegistrationData.objects.get(id=registration_id)
+                registration.set_verification_token()
+                send_verification_email(registration)
+                return JsonResponse({'success': True})
+        except RegistrationData.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Invalid registration data.'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
 
 @cache_control(public=True, max_age=3600)
 def user_login(request):
@@ -163,3 +240,32 @@ def user_logout(request):
 @login_required
 def profile(request):
     return render(request, 'accounts/profile.html', {'user': request.user})
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your profile has been updated successfully!')
+            return redirect('accounts:profile')
+    else:
+        form = UserProfileForm(instance=request.user)
+    
+    return render(request, 'accounts/edit_profile.html', {
+        'form': form
+    })
+
+def check_username(request):
+    if request.method == 'GET':
+        username = request.GET.get('username', '')
+        exists = CustomUser.objects.filter(username=username).exists()
+        return JsonResponse({'exists': exists})
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+def check_email(request):
+    if request.method == 'GET':
+        email = request.GET.get('email', '')
+        exists = CustomUser.objects.filter(email=email).exists()
+        return JsonResponse({'exists': exists})
+    return JsonResponse({'error': 'Invalid request method'}, status=400)

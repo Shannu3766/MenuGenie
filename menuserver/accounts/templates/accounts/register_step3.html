@@ -70,28 +70,4 @@
     }
 </style>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    const password1 = document.getElementById('password1');
-    const password2 = document.getElementById('password2');
-
-    form.addEventListener('submit', function(event) {
-        if (password1.value !== password2.value) {
-            event.preventDefault();
-            password2.setCustomValidity("Passwords don't match");
-        } else {
-            password2.setCustomValidity('');
-        }
-    });
-
-    password2.addEventListener('input', function() {
-        if (password1.value !== password2.value) {
-            password2.setCustomValidity("Passwords don't match");
-        } else {
-            password2.setCustomValidity('');
-        }
-    });
-});
-</script>
 {% endblock %} 
