@@ -7,7 +7,17 @@
     <div class="row">
         <div class="col-md-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h2">{{ menu_link.restaurant_name }} - Menu Management</h1>
+                <div>
+                    <h1 class="h2">{{ menu_link.restaurant_name }} - Menu Management</h1>
+                    <div class="d-flex align-items-center mt-2">
+                        <div class="input-group" style="max-width: 500px;">
+                            <input type="text" class="form-control" value="{{ request.scheme }}://{{ request.get_host }}{% url 'menu:public_menu' menu_link.user.id menu_link.restaurant_name %}" id="menuUrl" readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="copyMenuUrl()">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <a href="{% url 'menu:my_restaurants' %}" class="btn btn-outline-primary">
                     <i class="fas fa-arrow-left"></i> Back to Restaurants
                 </a>
@@ -270,6 +280,21 @@
 
 {% block extra_js %}
 <script>
+    function copyMenuUrl() {
+        var menuUrl = document.getElementById('menuUrl');
+        menuUrl.select();
+        menuUrl.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(menuUrl.value);
+        
+        // Show feedback
+        var copyBtn = menuUrl.nextElementSibling;
+        var originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        setTimeout(function() {
+            copyBtn.innerHTML = originalText;
+        }, 2000);
+    }
+
     $(document).ready(function() {
         let itemToDelete = null;
         let sectionToDelete = null;
