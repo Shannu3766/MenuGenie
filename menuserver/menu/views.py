@@ -98,3 +98,13 @@ def toggle_availability(request, menu_id, item_id):
             'is_available': menu_item.is_available
         })
     return JsonResponse({'status': 'error'}, status=400)
+
+def public_menu(request, user_id, restaurant_name):
+    menu_link = get_object_or_404(MenuLink, user_id=user_id, restaurant_name=restaurant_name)
+    menu_items = MenuItem.objects.filter(menu=menu_link, is_available=True).order_by('name')
+    
+    context = {
+        'menu_link': menu_link,
+        'menu_items': menu_items,
+    }
+    return render(request, 'menu/public_menu.html', context)

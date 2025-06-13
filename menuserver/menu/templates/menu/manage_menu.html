@@ -8,9 +8,17 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1>Manage Menu - {{ menu_link.restaurant_name }}</h1>
-                <a href="{% url 'menu:my_restaurants' %}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Back to Restaurants
-                </a>
+                <div>
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control" id="publicMenuLink" value="{{ request.scheme }}://{{ request.get_host }}/{{ menu_link.user.id }}/{{ menu_link.restaurant_name|slugify }}/" readonly>
+                        <button class="btn btn-outline-primary" type="button" onclick="copyPublicLink()">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <a href="{% url 'menu:my_restaurants' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Restaurants
+                    </a>
+                </div>
             </div>
 
             <!-- Alert Container -->
@@ -272,6 +280,27 @@ document.addEventListener('DOMContentLoaded', function() {
             handleToggleAvailability(itemId);
         });
     });
+
+    function copyPublicLink() {
+        const linkInput = document.getElementById('publicMenuLink');
+        linkInput.select();
+        document.execCommand('copy');
+        
+        // Show success message
+        const alertContainer = document.getElementById('alertContainer');
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-success alert-dismissible fade show';
+        alert.innerHTML = `
+            Public menu link copied to clipboard!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        alertContainer.appendChild(alert);
+        
+        // Remove alert after 3 seconds
+        setTimeout(() => {
+            alert.remove();
+        }, 3000);
+    }
 });
 </script>
-{% endblock %} 
+{% endblock %}

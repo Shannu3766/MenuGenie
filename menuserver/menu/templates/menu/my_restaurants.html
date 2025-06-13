@@ -16,11 +16,17 @@
                                 <div class="card-body">
                                     <h5 class="card-title">{{ link.restaurant_name|default:link.user.username }}'s Restaurant</h5>
                                     <p class="card-text text-muted">
-                                        <small>Website: {{ link.website_link|truncatechars:30 }}</small>
+                                        <small>Public Menu URL:</small>
                                     </p>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" value="{{ request.scheme }}://{{ request.get_host }}/{{ link.user.id }}/{{ link.restaurant_name|slugify }}/" readonly>
+                                        <button class="btn btn-outline-secondary" type="button" onclick="copyMenuLink(this)">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
                                     <div class="d-grid gap-2">
-                                        <a href="{{ link.website_link }}" target="_blank" class="btn btn-primary">
-                                            <i class="fas fa-external-link-alt me-2"></i>Visit Website
+                                        <a href="/{{ link.user.id }}/{{ link.restaurant_name|slugify }}/" target="_blank" class="btn btn-primary">
+                                            <i class="fas fa-external-link-alt me-2"></i>Visit Menu
                                         </a>
                                         <a href="{% url 'menu:manage_menu' link.id %}" class="btn btn-success">
                                             <i class="fas fa-utensils me-2"></i>Manage Menu
@@ -99,4 +105,25 @@
         color: #6c757d !important;
     }
 </style>
+
+<script>
+function copyMenuLink(button) {
+    const input = button.parentElement.querySelector('input');
+    input.select();
+    document.execCommand('copy');
+    
+    // Show success message
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-check"></i>';
+    button.classList.remove('btn-outline-secondary');
+    button.classList.add('btn-success');
+    
+    // Reset button after 2 seconds
+    setTimeout(() => {
+        button.innerHTML = originalText;
+        button.classList.remove('btn-success');
+        button.classList.add('btn-outline-secondary');
+    }, 2000);
+}
+</script>
 {% endblock %} 

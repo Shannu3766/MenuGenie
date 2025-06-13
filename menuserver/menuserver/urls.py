@@ -24,5 +24,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('menu/', include('menu.urls')),
     path('accounts/', include('accounts.urls')),
+    path('', include('menu.urls')),  # This will handle the public menu URLs
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
 ]
