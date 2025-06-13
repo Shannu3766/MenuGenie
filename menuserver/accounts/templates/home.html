@@ -1,23 +1,194 @@
 <!-- templates/home.html -->
 {% extends 'base.html' %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Welcome to MenuGenie{% endblock %}
 
 {% block content %}
-<div class="text-center">
-    <h1>Welcome to Menu Server!</h1>
-    <p>This is the home page.</p>
-    {% if user.is_authenticated %}
-        {% if user.is_restaurant_owner %}
-            <div class="mt-4">
-                <a href="{% url 'menu:my_restaurants' %}" class="btn btn-primary">View My Restaurants</a>
+<!-- Hero Section -->
+<div class="hero-section text-center py-5 animate__animated animate__fadeIn">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-4">Transform Your Restaurant's Digital Menu</h1>
+        <p class="lead mb-5">Create, manage, and share your restaurant menu with ease. Powered by AI technology.</p>
+        {% if not user.is_authenticated %}
+            <div class="cta-buttons">
+                <a href="{% url 'accounts:register_step1' %}" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-rocket me-2"></i>Get Started
+                </a>
+                <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                </a>
             </div>
         {% endif %}
-    {% else %}
-        <div class="mt-4">
-            <a href="{% url 'accounts:login' %}" class="btn btn-primary me-2">Login</a>
-            <a href="{% url 'accounts:register_step1' %}" class="btn btn-outline-primary">Register</a>
-        </div>
-    {% endif %}
+    </div>
 </div>
+
+<!-- Features Section -->
+<div class="features-section py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Why Choose MenuGenie?</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon">
+                            <i class="fas fa-magic"></i>
+                        </div>
+                        <h3 class="h5 mb-3">AI-Powered Menu Creation</h3>
+                        <p class="text-muted">Upload your menu image and let our AI extract all items and prices automatically.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <h3 class="h5 mb-3">Mobile-Friendly</h3>
+                        <p class="text-muted">Your menu looks great on any device, from smartphones to tablets and desktops.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3 class="h5 mb-3">Easy Management</h3>
+                        <p class="text-muted">Update prices, add new items, or modify your menu anytime, anywhere.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if user.is_authenticated %}
+    <!-- Dashboard Section -->
+    <div class="dashboard-section py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">Your Dashboard</h2>
+            <div class="row g-4">
+                {% if user.is_restaurant_owner %}
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h3 class="h5 mb-4">
+                                    <i class="fas fa-store me-2"></i>My Restaurants
+                                </h3>
+                                <p class="text-muted mb-4">Manage your restaurant menus and settings.</p>
+                                <a href="{% url 'menu:my_restaurants' %}" class="btn btn-primary">
+                                    <i class="fas fa-arrow-right me-2"></i>View Restaurants
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h3 class="h5 mb-4">
+                                    <i class="fas fa-user-cog me-2"></i>Profile Settings
+                                </h3>
+                                <p class="text-muted mb-4">Update your profile information and preferences.</p>
+                                <a href="{% url 'accounts:edit_profile' %}" class="btn btn-primary">
+                                    <i class="fas fa-arrow-right me-2"></i>Edit Profile
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h3 class="h5 mb-4">Welcome to MenuGenie!</h3>
+                                <p class="text-muted mb-4">Start exploring restaurants and their menus.</p>
+                                <a href="#" class="btn btn-primary">
+                                    <i class="fas fa-search me-2"></i>Browse Restaurants
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Call to Action -->
+<div class="cta-section py-5 text-center">
+    <div class="container">
+        <h2 class="mb-4">Ready to Transform Your Menu?</h2>
+        <p class="lead mb-4">Join thousands of restaurants already using MenuGenie.</p>
+        {% if not user.is_authenticated %}
+            <a href="{% url 'accounts:register_step1' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-rocket me-2"></i>Get Started Now
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 6rem 0;
+        margin-top: -1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .hero-section h1 {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-section .lead {
+        font-size: 1.5rem;
+        opacity: 0.9;
+    }
+
+    .features-section {
+        padding: 5rem 0;
+    }
+
+    .feature-icon {
+        font-size: 3rem;
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .dashboard-section {
+        background-color: var(--light-bg);
+        padding: 5rem 0;
+    }
+
+    .cta-section {
+        background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+        color: white;
+        padding: 5rem 0;
+    }
+
+    .cta-section .btn-primary {
+        background: white;
+        color: var(--primary-color);
+        border: none;
+        padding: 1rem 2rem;
+    }
+
+    .cta-section .btn-primary:hover {
+        background: rgba(255, 255, 255, 0.9);
+        transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+        .hero-section h1 {
+            font-size: 2.5rem;
+        }
+
+        .hero-section .lead {
+            font-size: 1.2rem;
+        }
+    }
+</style>
 {% endblock %}
