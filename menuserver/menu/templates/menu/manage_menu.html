@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Menu - {{ menu_link.restaurant_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Manage Menu - {{ menu_link.restaurant_name }}</h1>
+                <a href="{% url 'menu:my_restaurants' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Restaurants
+                </a>
+            </div>
+
+            <!-- Alert Container -->
+            <div id="alertContainer"></div>
+
+            <div class="row">
+                <!-- Add Menu Item Form -->
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Add New Item</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" enctype="multipart/form-data" id="menuItemForm">
+                                {% csrf_token %}
+                                {% for field in form %}
+                                    <div class="mb-3">
+                                        <label for="{{ field.id_for_label }}" class="form-label">
+                                            {{ field.label }}
+                                        </label>
+                                        {{ field }}
+                                        {% if field.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ field.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-plus me-2"></i>Add Item
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Menu Items List -->
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Menu Items</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if menu_items %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="menuItemsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Price</th>
+                                                <th>Quantity</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in menu_items %}
+                                                <tr data-item-id="{{ item.id }}">
+                                                    <td>
+                                                        {% if item.photo %}
+                                                            <img src="{{ item.photo.url }}" alt="{{ item.name }}" 
+                                                                 class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                                        {% endif %}
+                                                        {{ item.name }}
+                                                    </td>
+                                                    <td>₹{{ item.price }}</td>
+                                                    <td>{{ item.quantity }}</td>
+                                                    <td>
+                                                        <span class="badge {% if item.is_available %}bg-success{% else %}bg-danger{% endif %} availability-badge">
+                                                            {% if item.is_available %}Available{% else %}Unavailable{% endif %}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex gap-2">
+                                                            <button type="button" 
+                                                                    class="btn btn-sm {% if item.is_available %}btn-danger{% else %}btn-success{% endif %} availability-btn"
+                                                                    data-item-id="{{ item.id }}">
+                                                                {% if item.is_available %}
+                                                                    <i class="fas fa-times me-1"></i>Make Unavailable
+                                                                {% else %}
+                                                                    <i class="fas fa-check me-1"></i>Make Available
+                                                                {% endif %}
+                                                            </button>
+                                                            <button type="button" 
+                                                                    class="btn btn-sm btn-danger delete-btn"
+                                                                    data-item-id="{{ item.id }}">
+                                                                <i class="fas fa-trash me-1"></i>Delete
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <p class="text-muted mb-0">No menu items added yet.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    .table th {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    .btn {
+        border-radius: 0.25rem;
+        transition: all 0.2s;
+    }
+    .btn:hover {
+        transform: translateY(-1px);
+    }
+    .form-control {
+        border-radius: 0.25rem;
+    }
+    .form-control:focus {
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    }
+    .alert {
+        margin-bottom: 1rem;
+        animation: slideIn 0.3s ease-out;
+    }
+    .badge {
+        padding: 0.5em 0.75em;
+    }
+    .gap-2 {
+        gap: 0.5rem;
+    }
+    @keyframes slideIn {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const menuId = {{ menu_link.id }};
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    let alertTimeout;
+
+    // Function to show alert message
+    function showAlert(message, type = 'success') {
+        // Clear any existing alert timeout
+        if (alertTimeout) {
+            clearTimeout(alertTimeout);
+        }
+
+        // Remove any existing alerts
+        const alertContainer = document.getElementById('alertContainer');
+        alertContainer.innerHTML = '';
+
+        // Create and show new alert
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        alertContainer.appendChild(alertDiv);
+
+        // Set timeout to remove alert after 5 seconds
+        alertTimeout = setTimeout(() => {
+            alertDiv.classList.remove('show');
+            setTimeout(() => alertDiv.remove(), 300); // Wait for fade out animation
+        }, 5000);
+    }
+
+    // Function to handle delete item
+    async function handleDelete(itemId) {
+        if (!confirm('Are you sure you want to delete this item?')) return;
+
+        try {
+            const response = await fetch(`/menu/manage-menu/${menuId}/delete-item/${itemId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                }
+            });
+
+            if (response.ok) {
+                const row = document.querySelector(`tr[data-item-id="${itemId}"]`);
+                row.remove();
+                showAlert('Menu item deleted successfully!');
+            } else {
+                throw new Error('Failed to delete item');
+            }
+        } catch (error) {
+            showAlert('Error deleting item. Please try again.', 'danger');
+        }
+    }
+
+    // Function to handle toggle availability
+    async function handleToggleAvailability(itemId) {
+        try {
+            const response = await fetch(`/menu/manage-menu/${menuId}/toggle-availability/${itemId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const row = document.querySelector(`tr[data-item-id="${itemId}"]`);
+                const badge = row.querySelector('.availability-badge');
+                const toggleBtn = row.querySelector('.availability-btn');
+                
+                if (data.is_available) {
+                    badge.className = 'badge bg-success availability-badge';
+                    badge.textContent = 'Available';
+                    toggleBtn.className = 'btn btn-sm btn-danger availability-btn';
+                    toggleBtn.innerHTML = '<i class="fas fa-times me-1"></i>Make Unavailable';
+                } else {
+                    badge.className = 'badge bg-danger availability-badge';
+                    badge.textContent = 'Unavailable';
+                    toggleBtn.className = 'btn btn-sm btn-success availability-btn';
+                    toggleBtn.innerHTML = '<i class="fas fa-check me-1"></i>Make Available';
+                }
+                
+                showAlert(`Menu item is now ${data.is_available ? 'available' : 'unavailable'}!`);
+            } else {
+                throw new Error('Failed to toggle availability');
+            }
+        } catch (error) {
+            showAlert('Error updating availability. Please try again.', 'danger');
+        }
+    }
+
+    // Add event listeners for delete buttons
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const itemId = e.currentTarget.dataset.itemId;
+            handleDelete(itemId);
+        });
+    });
+
+    // Add event listeners for availability buttons
+    document.querySelectorAll('.availability-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const itemId = e.currentTarget.dataset.itemId;
+            handleToggleAvailability(itemId);
+        });
+    });
+});
+</script>
+{% endblock %} 

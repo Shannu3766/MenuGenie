@@ -14,15 +14,21 @@
                         <div class="col-md-6 col-lg-4 mb-4">
                             <div class="card h-100">
                                 <div class="card-body">
-                                    <h5 class="card-title">{{ link.user.username }}'s Restaurant</h5>
-                                    <p class="card-text">
-                                        <a href="{{ link.website_link }}" target="_blank" class="btn btn-primary">
-                                            Visit Website
-                                        </a>
+                                    <h5 class="card-title">{{ link.restaurant_name|default:link.user.username }}'s Restaurant</h5>
+                                    <p class="card-text text-muted">
+                                        <small>Website: {{ link.website_link|truncatechars:30 }}</small>
                                     </p>
+                                    <div class="d-grid gap-2">
+                                        <a href="{{ link.website_link }}" target="_blank" class="btn btn-primary">
+                                            <i class="fas fa-external-link-alt me-2"></i>Visit Website
+                                        </a>
+                                        <a href="{% url 'menu:manage_menu' link.id %}" class="btn btn-success">
+                                            <i class="fas fa-utensils me-2"></i>Manage Menu
+                                        </a>
+                                    </div>
                                 </div>
                                 <div class="card-footer text-muted">
-                                    Added: {{ link.created_at|date:"F j, Y" }}
+                                    <small>Added: {{ link.created_at|date:"F j, Y" }}</small>
                                 </div>
                             </div>
                         </div>
@@ -69,10 +75,28 @@
     .card {
         border: none;
         box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease-in-out;
+    }
+    .card:hover {
+        transform: translateY(-5px);
     }
     .alert {
         border: none;
         box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    .btn {
+        transition: all 0.2s ease-in-out;
+    }
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .card-title {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+    .text-muted {
+        color: #6c757d !important;
     }
 </style>
 {% endblock %} 
