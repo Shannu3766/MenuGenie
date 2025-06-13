@@ -3,8 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import IntegrityError
 from django.http import JsonResponse
-from .models import MenuLink, MenuItem
-from .forms import MenuItemForm
+from .models import MenuLink, MenuItem, MenuSection
+from .forms import MenuItemForm, MenuSectionForm
 
 # Create your views here.
 
@@ -55,7 +55,15 @@ def import_restaurant(request):
 @login_required
 def manage_menu(request, menu_id):
     menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
-    menu_items = MenuItem.objects.filter(menu=menu_link).order_by('-created_at')
+    
+    # Get all sections for this menu
+    sections = MenuSection.objects.filter(menu=menu_link).order_by('name')
+    
+    # Get all menu items
+    menu_items = MenuItem.objects.filter(menu=menu_link).order_by('section__name', 'name')
+    
+    # Get unsectioned items
+    unsectioned_items = menu_items.filter(section__isnull=True)
     
     if request.method == 'POST':
         form = MenuItemForm(request.POST, request.FILES)
@@ -65,17 +73,36 @@ def manage_menu(request, menu_id):
             menu_item.save()
             messages.success(request, 'Menu item added successfully!')
             return redirect('menu:manage_menu', menu_id=menu_id)
-        else:
-            messages.error(request, 'Please correct the errors below.')
     else:
         form = MenuItemForm()
     
-    context = {
+    # Add section form
+    section_form = MenuSectionForm()
+    
+    return render(request, 'menu/manage_menu.html', {
         'menu_link': menu_link,
+        'form': form,
+        'section_form': section_form,
+        'sections': sections,
         'menu_items': menu_items,
-        'form': form
-    }
-    return render(request, 'menu/manage_menu.html', context)
+        'unsectioned_items': unsectioned_items,
+    })
+
+@login_required
+def add_section(request, menu_id):
+    menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+    
+    if request.method == 'POST':
+        form = MenuSectionForm(request.POST)
+        if form.is_valid():
+            section = form.save(commit=False)
+            section.menu = menu_link
+            section.save()
+            messages.success(request, 'Section added successfully!')
+        else:
+            messages.error(request, 'Error adding section. Please try again.')
+    
+    return redirect('menu:manage_menu', menu_id=menu_id)
 
 @login_required
 def delete_menu_item(request, menu_id, item_id):
