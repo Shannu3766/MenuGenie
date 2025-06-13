@@ -102,6 +102,26 @@ def toggle_availability(request, menu_id, item_id):
         })
     return JsonResponse({'status': 'error'}, status=400)
 
+@login_required
+def edit_menu_item(request, menu_id, item_id):
+    menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+    menu_item = get_object_or_404(MenuItem, id=item_id, menu=menu_link)
+    
+    if request.method == 'POST':
+        form = MenuItemForm(request.POST, request.FILES, instance=menu_item)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Menu item updated successfully!')
+            return redirect('menu:manage_menu', menu_id=menu_id)
+    else:
+        form = MenuItemForm(instance=menu_item)
+    
+    return render(request, 'menu/edit_menu_item.html', {
+        'form': form,
+        'menu_link': menu_link,
+        'menu_item': menu_item
+    })
+
 def public_menu(request, user_id, restaurant_name):
     menu_link = get_object_or_404(MenuLink, user_id=user_id, restaurant_name=restaurant_name)
     menu_items = MenuItem.objects.filter(menu=menu_link, is_available=True).order_by('name')
