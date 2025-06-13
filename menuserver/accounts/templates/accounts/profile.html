@@ -1,0 +1,23 @@
+<!-- accounts/templates/accounts/profile.html -->
+{% extends 'base.html' %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h2 class="text-center mb-0">Profile</h2>
+            </div>
+            <div class="card-body">
+                <p><strong>Username:</strong> {{ user.username }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Phone:</strong> {{ user.phone_number }}</p>
+                <p><strong>Address:</strong> {{ user.address }}</p>
+                <p><strong>Restaurant Owner:</strong> {{ user.is_restaurant_owner|yesno:"Yes,No" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
