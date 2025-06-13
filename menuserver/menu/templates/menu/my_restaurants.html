@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}My Restaurants{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">My Restaurants</h1>
+            
+            {% if menu_links %}
+                <div class="row">
+                    {% for link in menu_links %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ link.user.username }}'s Restaurant</h5>
+                                    <p class="card-text">
+                                        <a href="{{ link.website_link }}" target="_blank" class="btn btn-primary">
+                                            Visit Website
+                                        </a>
+                                    </p>
+                                </div>
+                                <div class="card-footer text-muted">
+                                    Added: {{ link.created_at|date:"F j, Y" }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="alert alert-info mb-4">
+                        <h4 class="alert-heading">No Restaurants Yet!</h4>
+                        <p>You haven't added any restaurants yet. Would you like to create one?</p>
+                    </div>
+                    
+                    <div class="row justify-content-center">
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-4">Choose How to Create Your Restaurant</h5>
+                                    <div class="d-grid gap-3">
+                                        <a href="{% url 'menu:create_restaurant' %}" class="btn btn-primary btn-lg">
+                                            <i class="fas fa-plus-circle me-2"></i>Create New Restaurant
+                                        </a>
+                                        <a href="{% url 'menu:import_restaurant' %}" class="btn btn-outline-primary btn-lg">
+                                            <i class="fas fa-file-import me-2"></i>Import Existing Restaurant
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<style>
+    .btn-lg {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+    }
+    .card {
+        border: none;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    .alert {
+        border: none;
+        box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+</style>
+{% endblock %} 

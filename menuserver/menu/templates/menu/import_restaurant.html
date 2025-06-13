@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Import Restaurant{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4">Import Existing Restaurant</h2>
+                    
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="restaurant_name" class="form-label">Restaurant Name</label>
+                            <input type="text" class="form-control" id="restaurant_name" name="restaurant_name" 
+                                   required placeholder="e.g. The Food Place"
+                                   value="{{ restaurant_name|default:'' }}">
+                            <div class="form-text">
+                                Enter the name of the restaurant you are importing
+                            </div>
+                            <div class="invalid-feedback">
+                                Please enter a restaurant name.
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Import Restaurant</button>
+                            <a href="{% url 'menu:my_restaurants' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 10px;
+    }
+    .btn-primary {
+        padding: 0.8rem;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    });
+});
+</script>
+{% endblock %} 
