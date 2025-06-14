@@ -6,7 +6,7 @@
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-10">
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
                     <h2 class="text-center mb-4 fw-bold" style="color: #1e293b;">Step 2: Select Menu Template</h2>
@@ -24,57 +24,178 @@
                         {% csrf_token %}
                         <input type="hidden" name="restaurant_name" value="{{ restaurant_name }}">
                         <input type="hidden" name="restaurant_image" value="{{ restaurant_image }}">
+                        <input type="hidden" name="template" id="selected_template" value="classic">
                         
-                        <div class="row g-4">
-                            <!-- Classic Template -->
+                        <div class="row">
+                            <!-- Template List -->
                             <div class="col-md-4">
-                                <div class="template-card" data-template="classic">
-                                    <div class="card h-100 border-2">
-                                        <img src="{% static 'menu/images/classic-template.jpg' %}" class="card-img-top" alt="Classic Template">
-                                        <div class="card-body text-center">
-                                            <h5 class="card-title">Classic</h5>
-                                            <p class="card-text small text-muted">Traditional menu layout with elegant typography</p>
+                                <div class="template-list">
+                                    <div class="template-item active" data-template="classic">
+                                        <div class="d-flex align-items-center p-3 rounded-3 mb-2" style="background-color: #f8fafc;">
+                                            <i class="fas fa-book-open fa-2x me-3" style="color: #0ea5e9;"></i>
+                                            <div>
+                                                <h6 class="mb-1">Classic</h6>
+                                                <small class="text-muted">Traditional layout with elegant typography</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="template-item" data-template="modern">
+                                        <div class="d-flex align-items-center p-3 rounded-3 mb-2" style="background-color: #f8fafc;">
+                                            <i class="fas fa-paint-brush fa-2x me-3" style="color: #0ea5e9;"></i>
+                                            <div>
+                                                <h6 class="mb-1">Modern</h6>
+                                                <small class="text-muted">Contemporary design with bold visuals</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="template-item" data-template="minimal">
+                                        <div class="d-flex align-items-center p-3 rounded-3 mb-2" style="background-color: #f8fafc;">
+                                            <i class="fas fa-feather fa-2x me-3" style="color: #0ea5e9;"></i>
+                                            <div>
+                                                <h6 class="mb-1">Minimal</h6>
+                                                <small class="text-muted">Clean and simple design focusing on content</small>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             
-                            <!-- Modern Template -->
-                            <div class="col-md-4">
-                                <div class="template-card" data-template="modern">
-                                    <div class="card h-100 border-2">
-                                        <img src="{% static 'menu/images/modern-template.jpg' %}" class="card-img-top" alt="Modern Template">
-                                        <div class="card-body text-center">
-                                            <h5 class="card-title">Modern</h5>
-                                            <p class="card-text small text-muted">Contemporary design with bold visuals</p>
+                            <!-- Template Preview -->
+                            <div class="col-md-8">
+                                <div class="template-preview">
+                                    <div class="preview-container border rounded-3 p-4" style="background-color: #ffffff;">
+                                        <h5 class="mb-4">Template Preview</h5>
+                                        
+                                        <!-- Classic Template Preview -->
+                                        <div class="preview-content" id="preview-classic">
+                                            <div class="text-center mb-4">
+                                                <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=60" 
+                                                     alt="Restaurant Preview" class="img-fluid rounded-3 mb-3" style="height: 200px; object-fit: cover;">
+                                                <h3 class="fw-bold mb-2">Gourmet Delights</h3>
+                                                <p class="text-muted">Fine dining experience with a modern twist</p>
+                                            </div>
+                                            <div class="menu-section mb-4">
+                                                <h4 class="border-bottom pb-2 mb-3">Appetizers</h4>
+                                                <div class="menu-item mb-3">
+                                                    <div class="d-flex justify-content-between">
+                                                        <h5 class="mb-1">Truffle Arancini</h5>
+                                                        <span class="text-primary">$14.99</span>
+                                                    </div>
+                                                    <p class="text-muted mb-0">Crispy risotto balls with black truffle and mozzarella</p>
+                                                </div>
+                                                <div class="menu-item mb-3">
+                                                    <div class="d-flex justify-content-between">
+                                                        <h5 class="mb-1">Seared Scallops</h5>
+                                                        <span class="text-primary">$18.99</span>
+                                                    </div>
+                                                    <p class="text-muted mb-0">Fresh sea scallops with cauliflower puree and caviar</p>
+                                                </div>
+                                            </div>
+                                            <div class="menu-section mb-4">
+                                                <h4 class="border-bottom pb-2 mb-3">Main Courses</h4>
+                                                <div class="menu-item mb-3">
+                                                    <div class="d-flex justify-content-between">
+                                                        <h5 class="mb-1">Wagyu Ribeye</h5>
+                                                        <span class="text-primary">$45.99</span>
+                                                    </div>
+                                                    <p class="text-muted mb-0">A5 Japanese Wagyu with truffle mashed potatoes</p>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Minimal Template -->
-                            <div class="col-md-4">
-                                <div class="template-card" data-template="minimal">
-                                    <div class="card h-100 border-2">
-                                        <img src="{% static 'menu/images/minimal-template.jpg' %}" class="card-img-top" alt="Minimal Template">
-                                        <div class="card-body text-center">
-                                            <h5 class="card-title">Minimal</h5>
-                                            <p class="card-text small text-muted">Clean and simple design focusing on content</p>
+                                        
+                                        <!-- Modern Template Preview -->
+                                        <div class="preview-content" id="preview-modern" style="display: none;">
+                                            <div class="text-center mb-4">
+                                                <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=60" 
+                                                     alt="Restaurant Preview" class="img-fluid rounded-3 mb-3" style="height: 200px; object-fit: cover;">
+                                                <h2 class="fw-bold mb-2" style="color: #0ea5e9;">Urban Bites</h2>
+                                                <p class="text-muted">Contemporary cuisine in a vibrant setting</p>
+                                            </div>
+                                            <div class="menu-section mb-4">
+                                                <h4 class="mb-3" style="color: #0ea5e9;">Small Plates</h4>
+                                                <div class="menu-item p-3 rounded-3 mb-3" style="background-color: #f8fafc;">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <h5 class="mb-1">Crispy Calamari</h5>
+                                                            <p class="text-muted mb-0">Lightly fried with spicy aioli and lemon</p>
+                                                        </div>
+                                                        <span class="h5 mb-0 text-primary">$16.99</span>
+                                                    </div>
+                                                </div>
+                                                <div class="menu-item p-3 rounded-3 mb-3" style="background-color: #f8fafc;">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <h5 class="mb-1">Burrata Salad</h5>
+                                                            <p class="text-muted mb-0">Fresh burrata with heirloom tomatoes and basil</p>
+                                                        </div>
+                                                        <span class="h5 mb-0 text-primary">$15.99</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="menu-section mb-4">
+                                                <h4 class="mb-3" style="color: #0ea5e9;">Signature Dishes</h4>
+                                                <div class="menu-item p-3 rounded-3 mb-3" style="background-color: #f8fafc;">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <h5 class="mb-1">Lobster Linguine</h5>
+                                                            <p class="text-muted mb-0">Fresh Maine lobster with house-made pasta</p>
+                                                        </div>
+                                                        <span class="h5 mb-0 text-primary">$38.99</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Minimal Template Preview -->
+                                        <div class="preview-content" id="preview-minimal" style="display: none;">
+                                            <div class="text-center mb-4">
+                                                <img src="https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800&auto=format&fit=crop&q=60" 
+                                                     alt="Restaurant Preview" class="img-fluid rounded-3 mb-3" style="height: 200px; object-fit: cover;">
+                                                <h3 class="fw-bold mb-2">Zen Kitchen</h3>
+                                                <p class="text-muted">Mindful dining with seasonal ingredients</p>
+                                            </div>
+                                            <div class="menu-section mb-4">
+                                                <h4 class="mb-3">To Begin</h4>
+                                                <div class="menu-item mb-3">
+                                                    <div class="d-flex justify-content-between">
+                                                        <h5 class="mb-1">Miso Soup</h5>
+                                                        <span>$8.99</span>
+                                                    </div>
+                                                    <p class="text-muted mb-0">Traditional dashi broth with tofu and seaweed</p>
+                                                </div>
+                                                <div class="menu-item mb-3">
+                                                    <div class="d-flex justify-content-between">
+                                                        <h5 class="mb-1">Edamame</h5>
+                                                        <span>$7.99</span>
+                                                    </div>
+                                                    <p class="text-muted mb-0">Steamed soybeans with sea salt</p>
+                                                </div>
+                                            </div>
+                                            <div class="menu-section mb-4">
+                                                <h4 class="mb-3">Main</h4>
+                                                <div class="menu-item mb-3">
+                                                    <div class="d-flex justify-content-between">
+                                                        <h5 class="mb-1">Sushi Platter</h5>
+                                                        <span>$32.99</span>
+                                                    </div>
+                                                    <p class="text-muted mb-0">Chef's selection of 12 pieces</p>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <input type="hidden" name="template" id="selected_template" value="classic">
-                        
-                        <div class="d-grid gap-3 mt-5">
-                            <button type="submit" class="btn btn-primary rounded-pill py-2">
-                                <i class="fas fa-check me-2"></i>Create Restaurant
-                            </button>
-                            <a href="{% url 'menu:create_restaurant' %}" class="btn btn-outline-secondary rounded-pill py-2">
+                        <div class="d-flex justify-content-between mt-5">
+                            <a href="{% url 'menu:create_restaurant' %}" class="btn btn-light rounded-pill px-4 py-2">
                                 <i class="fas fa-arrow-left me-2"></i>Back
                             </a>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4 py-2">
+                                <i class="fas fa-check me-2"></i>Create Restaurant
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -84,72 +205,68 @@
 </div>
 
 <style>
-    .template-card {
+    .template-item {
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease-in-out;
     }
     
-    .template-card:hover {
-        transform: translateY(-5px);
+    .template-item:hover {
+        transform: translateX(5px);
     }
     
-    .template-card.selected .card {
-        border-color: #0ea5e9 !important;
-        box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.25);
+    .template-item.active > div {
+        background-color: #0ea5e9 !important;
+        color: white;
     }
     
-    .card {
-        border-radius: 15px;
-        overflow: hidden;
+    .template-item.active > div i,
+    .template-item.active > div h6,
+    .template-item.active > div small {
+        color: white !important;
     }
     
-    .card-img-top {
-        height: 200px;
-        object-fit: cover;
+    .preview-container {
+        min-height: 600px;
+        transition: all 0.3s ease-in-out;
     }
     
-    .btn-primary {
-        background-color: #0ea5e9;
-        border-color: #0ea5e9;
+    .preview-content {
+        transition: all 0.3s ease-in-out;
     }
-    
-    .btn-primary:hover {
-        background-color: #0284c7;
-        border-color: #0284c7;
+
+    .menu-item {
+        transition: all 0.2s ease-in-out;
     }
-    
-    .btn-outline-secondary {
-        color: #64748b;
-        border-color: #e2e8f0;
-    }
-    
-    .btn-outline-secondary:hover {
-        background-color: #f1f5f9;
-        border-color: #e2e8f0;
-        color: #475569;
+
+    .menu-item:hover {
+        transform: translateX(5px);
     }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const templateCards = document.querySelectorAll('.template-card');
+    const templateItems = document.querySelectorAll('.template-item');
     const selectedTemplateInput = document.getElementById('selected_template');
     
-    templateCards.forEach(card => {
-        card.addEventListener('click', function() {
-            // Remove selected class from all cards
-            templateCards.forEach(c => c.classList.remove('selected'));
+    templateItems.forEach(item => {
+        item.addEventListener('click', function() {
+            // Remove active class from all items
+            templateItems.forEach(i => i.classList.remove('active'));
             
-            // Add selected class to clicked card
-            this.classList.add('selected');
+            // Add active class to clicked item
+            this.classList.add('active');
             
-            // Update hidden input value
-            selectedTemplateInput.value = this.dataset.template;
+            // Update hidden input
+            const template = this.dataset.template;
+            selectedTemplateInput.value = template;
+            
+            // Show corresponding preview
+            document.querySelectorAll('.preview-content').forEach(preview => {
+                preview.style.display = 'none';
+            });
+            document.getElementById(`preview-${template}`).style.display = 'block';
         });
     });
-    
-    // Select classic template by default
-    document.querySelector('[data-template="classic"]').classList.add('selected');
 });
 </script>
 {% endblock %} 

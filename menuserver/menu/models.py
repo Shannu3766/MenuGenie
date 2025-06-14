@@ -10,6 +10,7 @@ from django.utils.text import slugify
 class Restaurant(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
+    tagline = models.CharField(max_length=200, blank=True)
     image = models.ImageField(upload_to='restaurants/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

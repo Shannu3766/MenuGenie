@@ -27,61 +27,39 @@ def my_restaurants(request):
 @login_required
 def create_restaurant(request):
     if request.method == 'POST':
-        if 'template' in request.POST:
-            # Second step: Create restaurant with template
-            restaurant_name = request.POST.get('restaurant_name')
-            restaurant_image = request.FILES.get('restaurant_image')
-            template = request.POST.get('template')
-            
-            try:
-                # Check if restaurant with same name exists for this user
-                existing = Restaurant.objects.filter(user=request.user, name=restaurant_name).first()
-                if existing:
-                    messages.error(request, f'A restaurant named "{restaurant_name}" already exists.')
-                    return redirect('menu:create_restaurant')
-                
-                # Create restaurant
-                restaurant = Restaurant.objects.create(
-                    user=request.user,
-                    name=restaurant_name,
-                    image=restaurant_image
-                )
-                
-                # Create menu link
-                menu_link = MenuLink.objects.create(
-                    user=request.user,
-                    restaurant=restaurant,
-                    template=template
-                )
-                
-                messages.success(request, 'Restaurant created successfully!')
-                return redirect('menu:my_restaurants')
-            except IntegrityError:
-                messages.error(request, f'A restaurant named "{restaurant_name}" already exists.')
-                return render(request, 'menu/create_restaurant.html', {
-                    'restaurant_name': restaurant_name
-                })
-        else:
-            # First step: Save basic info and redirect to template selection
-            restaurant_name = request.POST.get('restaurant_name')
-            restaurant_image = request.FILES.get('restaurant_image')
-            
-            if not restaurant_name or not restaurant_image:
-                messages.error(request, 'Please provide both restaurant name and image.')
-                return redirect('menu:create_restaurant')
-            
-            # Store the data in session for the next step
-            request.session['restaurant_name'] = restaurant_name
-            request.session['restaurant_image'] = restaurant_image.name
-            
-            # Save the image temporarily
-            fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'temp'))
-            filename = fs.save(restaurant_image.name, restaurant_image)
-            
-            return render(request, 'menu/select_template.html', {
+        restaurant_name = request.POST.get('restaurant_name')
+        restaurant_tagline = request.POST.get('restaurant_tagline')
+        restaurant_image = request.FILES.get('restaurant_image')
+        
+        if not restaurant_name:
+            messages.error(request, 'Restaurant name is required.')
+            return render(request, 'menu/create_restaurant.html', {
                 'restaurant_name': restaurant_name,
-                'restaurant_image': filename
+                'restaurant_tagline': restaurant_tagline
             })
+        
+        # Check if restaurant name already exists
+        if Restaurant.objects.filter(name=restaurant_name).exists():
+            messages.error(request, 'A restaurant with this name already exists.')
+            return render(request, 'menu/create_restaurant.html', {
+                'restaurant_name': restaurant_name,
+                'restaurant_tagline': restaurant_tagline
+            })
+        
+        # Create restaurant
+        restaurant = Restaurant.objects.create(
+            name=restaurant_name,
+            tagline=restaurant_tagline,
+            image=restaurant_image
+        )
+        
+        # Create menu link
+        menu_link = MenuLink.objects.create(
+            user=request.user,
+            restaurant=restaurant
+        )
+        
+        return redirect('menu:select_template', menu_id=menu_link.id)
     
     return render(request, 'menu/create_restaurant.html')
 
@@ -404,34 +382,29 @@ def edit_restaurant(request, menu_id):
     
     if request.method == 'POST':
         restaurant_name = request.POST.get('restaurant_name')
+        restaurant_tagline = request.POST.get('restaurant_tagline')
         restaurant_image = request.FILES.get('restaurant_image')
         
-        if restaurant_name:
-            try:
-                # Update restaurant name
-                menu_link.restaurant.name = restaurant_name
-                
-                # Update restaurant image if provided
-                if restaurant_image:
-                    # Delete old image if it exists
-                    if menu_link.restaurant.image:
-                        if os.path.isfile(menu_link.restaurant.image.path):
-                            os.remove(menu_link.restaurant.image.path)
-                    menu_link.restaurant.image = restaurant_image
-                
-                menu_link.restaurant.save()
-                messages.success(request, 'Restaurant updated successfully!')
-                return redirect('menu:my_restaurants')
-            except IntegrityError:
-                messages.error(request, f'A restaurant named "{restaurant_name}" already exists. Please choose a different name.')
-                return render(request, 'menu/edit_restaurant.html', {
-                    'menu_link': menu_link,
-                    'restaurant_name': restaurant_name
-                })
+        if not restaurant_name:
+            messages.error(request, 'Restaurant name is required.')
+            return render(request, 'menu/edit_restaurant.html', {'menu_link': menu_link})
+        
+        # Check if restaurant name already exists (excluding current restaurant)
+        if Restaurant.objects.filter(name=restaurant_name).exclude(id=menu_link.restaurant.id).exists():
+            messages.error(request, 'A restaurant with this name already exists.')
+            return render(request, 'menu/edit_restaurant.html', {'menu_link': menu_link})
+        
+        # Update restaurant
+        menu_link.restaurant.name = restaurant_name
+        menu_link.restaurant.tagline = restaurant_tagline
+        if restaurant_image:
+            menu_link.restaurant.image = restaurant_image
+        menu_link.restaurant.save()
+        
+        messages.success(request, 'Restaurant updated successfully!')
+        return redirect('menu:my_restaurants')
     
-    return render(request, 'menu/edit_restaurant.html', {
-        'menu_link': menu_link
-    })
+    return render(request, 'menu/edit_restaurant.html', {'menu_link': menu_link})
 
 @login_required
 def change_template(request, menu_id):

@@ -81,55 +81,217 @@
                     </div>
                 </div>
 
-                <!-- Template Change Modal -->
-                <div class="modal fade" id="templateModal{{ link.id }}" tabindex="-1" aria-labelledby="templateModalLabel{{ link.id }}" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
+                <!-- Template Selection Modal -->
+                <div class="modal fade" id="templateModal{{ link.id }}" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
                         <div class="modal-content">
                             <div class="modal-header border-0">
-                                <h5 class="modal-title" id="templateModalLabel{{ link.id }}">Change Menu Template</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <h5 class="modal-title fw-bold" style="color: #1e293b;">Change Template</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
-                            <div class="modal-body">
-                                <form action="{% url 'menu:change_template' link.id %}" method="post">
+                            <div class="modal-body p-0">
+                                <div class="row g-0">
+                                    <!-- Template Options -->
+                                    <div class="col-md-4 border-end">
+                                        <div class="p-3">
+                                            <h6 class="text-muted mb-3">Select a Template</h6>
+                                            <div class="template-list">
+                                                <div class="template-option mb-2 p-3 rounded-3 cursor-pointer {% if link.template == 'classic' %}active{% endif %}" 
+                                                     data-template="classic" 
+                                                     data-preview="classic-preview">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fas fa-book-open fa-lg me-3" style="color: #0ea5e9;"></i>
+                                                        <div>
+                                                            <h6 class="mb-1">Classic</h6>
+                                                            <small class="text-muted">Traditional menu layout</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="template-option mb-2 p-3 rounded-3 cursor-pointer {% if link.template == 'modern' %}active{% endif %}" 
+                                                     data-template="modern" 
+                                                     data-preview="modern-preview">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fas fa-palette fa-lg me-3" style="color: #0ea5e9;"></i>
+                                                        <div>
+                                                            <h6 class="mb-1">Modern</h6>
+                                                            <small class="text-muted">Contemporary design</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="template-option mb-2 p-3 rounded-3 cursor-pointer {% if link.template == 'minimal' %}active{% endif %}" 
+                                                     data-template="minimal" 
+                                                     data-preview="minimal-preview">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="fas fa-feather fa-lg me-3" style="color: #0ea5e9;"></i>
+                                                        <div>
+                                                            <h6 class="mb-1">Minimal</h6>
+                                                            <small class="text-muted">Clean and simple</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Template Preview -->
+                                    <div class="col-md-8">
+                                        <div class="p-4">
+                                            <h6 class="text-muted mb-3">Preview</h6>
+                                            <div class="preview-container">
+                                                <!-- Classic Template Preview -->
+                                                <div id="classic-preview" class="template-preview {% if link.template == 'classic' %}active{% endif %}">
+                                                    <div class="preview-card">
+                                                        <div class="preview-header" style="background-color: #f8fafc; padding: 1.5rem;">
+                                                            <h4 class="mb-2">{{ link.restaurant.name }}</h4>
+                                                            {% if link.restaurant.tagline %}
+                                                                <p class="text-muted mb-0">{{ link.restaurant.tagline }}</p>
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="preview-body p-4">
+                                                            <div class="mb-4">
+                                                                <h5 class="text-primary mb-3">Appetizers</h5>
+                                                                <div class="menu-item mb-3">
+                                                                    <div class="d-flex justify-content-between">
+                                                                        <h6 class="mb-1">Bruschetta</h6>
+                                                                        <span class="text-primary">$8.99</span>
+                                                                    </div>
+                                                                    <p class="text-muted small mb-0">Toasted bread with fresh tomatoes and basil</p>
+                                                                </div>
+                                                                <div class="menu-item">
+                                                                    <div class="d-flex justify-content-between">
+                                                                        <h6 class="mb-1">Calamari</h6>
+                                                                        <span class="text-primary">$12.99</span>
+                                                                    </div>
+                                                                    <p class="text-muted small mb-0">Crispy fried calamari with marinara sauce</p>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <h5 class="text-primary mb-3">Main Courses</h5>
+                                                                <div class="menu-item mb-3">
+                                                                    <div class="d-flex justify-content-between">
+                                                                        <h6 class="mb-1">Grilled Salmon</h6>
+                                                                        <span class="text-primary">$24.99</span>
+                                                                    </div>
+                                                                    <p class="text-muted small mb-0">Fresh salmon with seasonal vegetables</p>
+                                                                </div>
+                                                                <div class="menu-item">
+                                                                    <div class="d-flex justify-content-between">
+                                                                        <h6 class="mb-1">Beef Tenderloin</h6>
+                                                                        <span class="text-primary">$29.99</span>
+                                                                    </div>
+                                                                    <p class="text-muted small mb-0">8oz tenderloin with red wine reduction</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Modern Template Preview -->
+                                                <div id="modern-preview" class="template-preview {% if link.template == 'modern' %}active{% endif %}">
+                                                    <div class="preview-card">
+                                                        <div class="preview-header text-white" style="background-color: #0ea5e9; padding: 2rem;">
+                                                            <h4 class="mb-2">{{ link.restaurant.name }}</h4>
+                                                            {% if link.restaurant.tagline %}
+                                                                <p class="mb-0 opacity-75">{{ link.restaurant.tagline }}</p>
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="preview-body p-4">
+                                                            <div class="mb-4">
+                                                                <h5 class="mb-3" style="color: #0ea5e9;">Small Plates</h5>
+                                                                <div class="menu-item mb-3">
+                                                                    <div class="d-flex justify-content-between align-items-start">
+                                                                        <div>
+                                                                            <h6 class="mb-1">Truffle Fries</h6>
+                                                                            <p class="text-muted small mb-0">Hand-cut fries with truffle oil and parmesan</p>
+                                                                        </div>
+                                                                        <span class="text-primary ms-3">$9.99</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="menu-item">
+                                                                    <div class="d-flex justify-content-between align-items-start">
+                                                                        <div>
+                                                                            <h6 class="mb-1">Ahi Tuna Tartare</h6>
+                                                                            <p class="text-muted small mb-0">Fresh tuna with avocado and wonton crisps</p>
+                                                                        </div>
+                                                                        <span class="text-primary ms-3">$16.99</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <h5 class="mb-3" style="color: #0ea5e9;">Signature Dishes</h5>
+                                                                <div class="menu-item mb-3">
+                                                                    <div class="d-flex justify-content-between align-items-start">
+                                                                        <div>
+                                                                            <h6 class="mb-1">Lobster Risotto</h6>
+                                                                            <p class="text-muted small mb-0">Creamy risotto with fresh lobster meat</p>
+                                                                        </div>
+                                                                        <span class="text-primary ms-3">$32.99</span>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="menu-item">
+                                                                    <div class="d-flex justify-content-between align-items-start">
+                                                                        <div>
+                                                                            <h6 class="mb-1">Wagyu Burger</h6>
+                                                                            <p class="text-muted small mb-0">Premium wagyu beef with truffle aioli</p>
+                                                                        </div>
+                                                                        <span class="text-primary ms-3">$24.99</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Minimal Template Preview -->
+                                                <div id="minimal-preview" class="template-preview {% if link.template == 'minimal' %}active{% endif %}">
+                                                    <div class="preview-card">
+                                                        <div class="preview-header text-center" style="padding: 2rem;">
+                                                            <h4 class="mb-2">{{ link.restaurant.name }}</h4>
+                                                            {% if link.restaurant.tagline %}
+                                                                <p class="text-muted mb-0">{{ link.restaurant.tagline }}</p>
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="preview-body p-4">
+                                                            <div class="mb-4">
+                                                                <h5 class="text-center mb-4">To Begin</h5>
+                                                                <div class="menu-item text-center mb-4">
+                                                                    <h6 class="mb-1">House Salad</h6>
+                                                                    <p class="text-muted small mb-2">Mixed greens, cherry tomatoes, balsamic vinaigrette</p>
+                                                                    <span class="text-primary">$8.99</span>
+                                                                </div>
+                                                                <div class="menu-item text-center">
+                                                                    <h6 class="mb-1">Soup of the Day</h6>
+                                                                    <p class="text-muted small mb-2">Chef's selection, served with artisan bread</p>
+                                                                    <span class="text-primary">$7.99</span>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <h5 class="text-center mb-4">Main</h5>
+                                                                <div class="menu-item text-center mb-4">
+                                                                    <h6 class="mb-1">Pan-Seared Sea Bass</h6>
+                                                                    <p class="text-muted small mb-2">With herb butter and lemon</p>
+                                                                    <span class="text-primary">$28.99</span>
+                                                                </div>
+                                                                <div class="menu-item text-center">
+                                                                    <h6 class="mb-1">Vegetable Risotto</h6>
+                                                                    <p class="text-muted small mb-2">Seasonal vegetables, parmesan, white wine</p>
+                                                                    <span class="text-primary">$22.99</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-0">
+                                <form method="post" action="{% url 'menu:change_template' link.id %}">
                                     {% csrf_token %}
-                                    <div class="row g-4">
-                                        <div class="col-md-4">
-                                            <div class="template-option">
-                                                <input type="radio" class="btn-check" name="template" id="classic{{ link.id }}" value="classic" {% if link.template == 'classic' %}checked{% endif %}>
-                                                <label class="btn btn-outline-primary w-100" for="classic{{ link.id }}">
-                                                    <i class="fas fa-book-open fa-2x mb-2"></i>
-                                                    <div>Classic</div>
-                                                    <small class="text-muted">Traditional layout</small>
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="template-option">
-                                                <input type="radio" class="btn-check" name="template" id="modern{{ link.id }}" value="modern" {% if link.template == 'modern' %}checked{% endif %}>
-                                                <label class="btn btn-outline-primary w-100" for="modern{{ link.id }}">
-                                                    <i class="fas fa-paint-brush fa-2x mb-2"></i>
-                                                    <div>Modern</div>
-                                                    <small class="text-muted">Contemporary design</small>
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="template-option">
-                                                <input type="radio" class="btn-check" name="template" id="minimal{{ link.id }}" value="minimal" {% if link.template == 'minimal' %}checked{% endif %}>
-                                                <label class="btn btn-outline-primary w-100" for="minimal{{ link.id }}">
-                                                    <i class="fas fa-feather fa-2x mb-2"></i>
-                                                    <div>Minimal</div>
-                                                    <small class="text-muted">Clean and simple</small>
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex justify-content-end mt-4">
-                                        <button type="button" class="btn btn-light rounded-pill px-4 me-2" data-bs-dismiss="modal">Cancel</button>
-                                        <button type="submit" class="btn btn-primary rounded-pill px-4">
-                                            <i class="fas fa-save me-2"></i>Save Changes
-                                        </button>
-                                    </div>
+                                    <input type="hidden" name="template" id="selectedTemplate{{ link.id }}" value="{{ link.template }}">
+                                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary rounded-pill px-4">Save Changes</button>
                                 </form>
                             </div>
                         </div>
@@ -294,6 +456,44 @@
     .template-option .btn-check:checked + .btn small {
         color: white !important;
     }
+
+    /* Template Selection Styles */
+    .template-option {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .template-option:hover {
+        background-color: #f1f5f9;
+        transform: translateX(5px);
+    }
+    
+    .template-option.active {
+        background-color: #f0f9ff;
+        border: 1px solid #0ea5e9;
+    }
+    
+    .template-preview {
+        display: none;
+    }
+    
+    .template-preview.active {
+        display: block;
+    }
+    
+    .preview-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .menu-item {
+        transition: all 0.3s ease;
+    }
+    
+    .menu-item:hover {
+        transform: translateX(5px);
+    }
 </style>
 
 <script>
@@ -315,5 +515,32 @@ function copyMenuLink(button) {
         button.classList.add('btn-outline-secondary');
     }, 2000);
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Template selection functionality
+    document.querySelectorAll('.template-option').forEach(option => {
+        option.addEventListener('click', function() {
+            const template = this.dataset.template;
+            const previewId = this.dataset.preview;
+            const modalId = this.closest('.modal').id;
+            const linkId = modalId.replace('templateModal', '');
+            
+            // Update selected template
+            document.getElementById('selectedTemplate' + linkId).value = template;
+            
+            // Update active states
+            this.closest('.template-list').querySelectorAll('.template-option').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            this.classList.add('active');
+            
+            // Update preview
+            this.closest('.modal').querySelectorAll('.template-preview').forEach(preview => {
+                preview.classList.remove('active');
+            });
+            document.getElementById(previewId).classList.add('active');
+        });
+    });
+});
 </script>
 {% endblock %} 
