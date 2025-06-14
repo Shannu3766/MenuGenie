@@ -20,6 +20,33 @@
             {% for link in menu_links %}
                 <div class="col-md-6 col-lg-4 mb-4">
                     <div class="card h-100 border-0 shadow-sm">
+                        <div class="position-absolute top-0 end-0 p-3">
+                            <div class="dropdown">
+                                <button class="btn btn-light btn-sm rounded-circle shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'menu:edit_restaurant' link.id %}">
+                                            <i class="fas fa-edit me-2"></i>Edit Restaurant
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#deleteModal{{ link.id }}">
+                                            <i class="fas fa-trash-alt me-2"></i>Delete Restaurant
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        {% if link.restaurant_image %}
+                            <img src="{{ link.restaurant_image.url }}" class="card-img-top" alt="{{ link.restaurant_name }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="fas fa-utensils fa-3x text-muted"></i>
+                            </div>
+                        {% endif %}
                         <div class="card-body p-4">
                             <h5 class="card-title fw-bold mb-3">{{ link.restaurant_name|default:link.user.username }}'s Restaurant</h5>
                             <p class="card-text text-muted mb-3">
@@ -178,4 +205,30 @@ function copyMenuLink(button) {
     }, 2000);
 }
 </script>
+
+<!-- Delete Modal for each restaurant -->
+{% for link in menu_links %}
+<div class="modal fade" id="deleteModal{{ link.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ link.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="deleteModalLabel{{ link.id }}">Delete Restaurant</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">Are you sure you want to delete "{{ link.restaurant_name }}"? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                <form action="{% url 'menu:delete_restaurant' link.id %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger rounded-pill px-4">
+                        <i class="fas fa-trash-alt me-2"></i>Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
 {% endblock %} 

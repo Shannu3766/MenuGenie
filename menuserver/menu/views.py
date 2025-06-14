@@ -26,17 +26,22 @@ def my_restaurants(request):
 def create_restaurant(request):
     if request.method == 'POST':
         restaurant_name = request.POST.get('restaurant_name')
+        restaurant_image = request.FILES.get('restaurant_image')
+        
         if restaurant_name:
             try:
-                MenuLink.objects.create(
+                menu_link = MenuLink.objects.create(
                     user=request.user,
-                    restaurant_name=restaurant_name
+                    restaurant_name=restaurant_name,
+                    restaurant_image=restaurant_image
                 )
                 messages.success(request, 'Restaurant created successfully!')
                 return redirect('menu:my_restaurants')
             except IntegrityError:
                 messages.error(request, f'A restaurant named "{restaurant_name}" already exists. Please choose a different name.')
-                return render(request, 'menu/create_restaurant.html', {'restaurant_name': restaurant_name})
+                return render(request, 'menu/create_restaurant.html', {
+                    'restaurant_name': restaurant_name
+                })
     return render(request, 'menu/create_restaurant.html')
 
 @login_required
@@ -298,3 +303,56 @@ def toggle_section_availability(request, menu_id, section_id):
         messages.success(request, f'All items in section "{section.name}" are now {status}!')
         return JsonResponse({'status': 'success'})
     return JsonResponse({'status': 'error'}, status=400)
+
+@login_required
+def delete_restaurant(request, menu_id):
+    if request.method == 'POST':
+        menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+        
+        # Delete the restaurant image if it exists
+        if menu_link.restaurant_image:
+            # Delete the image file
+            if os.path.isfile(menu_link.restaurant_image.path):
+                os.remove(menu_link.restaurant_image.path)
+        
+        # Delete the restaurant
+        menu_link.delete()
+        messages.success(request, 'Restaurant deleted successfully!')
+        return redirect('menu:my_restaurants')
+    
+    return redirect('menu:my_restaurants')
+
+@login_required
+def edit_restaurant(request, menu_id):
+    menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+    
+    if request.method == 'POST':
+        restaurant_name = request.POST.get('restaurant_name')
+        restaurant_image = request.FILES.get('restaurant_image')
+        
+        if restaurant_name:
+            try:
+                # Update restaurant name
+                menu_link.restaurant_name = restaurant_name
+                
+                # Update restaurant image if provided
+                if restaurant_image:
+                    # Delete old image if it exists
+                    if menu_link.restaurant_image:
+                        if os.path.isfile(menu_link.restaurant_image.path):
+                            os.remove(menu_link.restaurant_image.path)
+                    menu_link.restaurant_image = restaurant_image
+                
+                menu_link.save()
+                messages.success(request, 'Restaurant updated successfully!')
+                return redirect('menu:my_restaurants')
+            except IntegrityError:
+                messages.error(request, f'A restaurant named "{restaurant_name}" already exists. Please choose a different name.')
+                return render(request, 'menu/edit_restaurant.html', {
+                    'menu_link': menu_link,
+                    'restaurant_name': restaurant_name
+                })
+    
+    return render(request, 'menu/edit_restaurant.html', {
+        'menu_link': menu_link
+    })

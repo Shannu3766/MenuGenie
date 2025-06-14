@@ -15,6 +15,8 @@ admin_urlpatterns = [
     path('manage-menu/<int:menu_id>/toggle-availability/<int:item_id>/', views.toggle_availability, name='toggle_availability'),
     path('manage-menu/<int:menu_id>/toggle-section-availability/<int:section_id>/', views.toggle_section_availability, name='toggle_section_availability'),
     path('manage-menu/<int:menu_id>/edit-item/<int:item_id>/', views.edit_menu_item, name='edit_item'),
+    path('menu/<int:menu_id>/delete/', views.delete_restaurant, name='delete_restaurant'),
+    path('menu/<int:menu_id>/edit/', views.edit_restaurant, name='edit_restaurant'),
 ]
 
 # Public URLs (no prefix)

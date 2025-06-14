@@ -11,11 +11,18 @@ class MenuLink(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, null=True, blank=True)
     restaurant_name = models.CharField(max_length=100)
+    restaurant_image = models.ImageField(upload_to='restaurant_images/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.restaurant_name} - {self.name}"
+
+    def save(self, *args, **kwargs):
+        # Ensure the restaurant image path includes the restaurant name for better organization
+        if self.restaurant_image and not self.restaurant_image.name.startswith(f'restaurant_images/{self.restaurant_name}/'):
+            self.restaurant_image.name = f'restaurant_images/{self.restaurant_name}/{self.restaurant_image.name}'
+        super().save(*args, **kwargs)
 
 class MenuSection(models.Model):
     menu = models.ForeignKey(MenuLink, on_delete=models.CASCADE, related_name='sections')

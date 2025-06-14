@@ -3,12 +3,12 @@
 {% block title %}Create Restaurant{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card shadow-sm">
+            <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
-                    <h2 class="text-center mb-4">Create New Restaurant</h2>
+                    <h2 class="text-center mb-4 fw-bold" style="color: #1e293b;">Create New Restaurant</h2>
                     
                     {% if messages %}
                         {% for message in messages %}
@@ -19,10 +19,33 @@
                         {% endfor %}
                     {% endif %}
 
-                    <form method="post" class="needs-validation" novalidate>
+                    <form method="post" class="needs-validation" novalidate enctype="multipart/form-data">
                         {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="restaurant_name" class="form-label">Restaurant Name</label>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-medium">Restaurant Image</label>
+                            <div class="image-upload-container text-center p-4 border rounded-3 mb-2" style="background-color: #f8fafc;">
+                                <div id="imagePreview" class="mb-3" style="display: none;">
+                                    <img id="preview" src="#" alt="Preview" class="img-fluid rounded-3" style="max-height: 200px;">
+                                </div>
+                                <div id="uploadPlaceholder" class="py-4">
+                                    <i class="fas fa-cloud-upload-alt fa-3x mb-3" style="color: #94a3b8;"></i>
+                                    <p class="mb-2" style="color: #64748b;">Drag and drop your restaurant image here</p>
+                                    <p class="small text-muted mb-0">or</p>
+                                </div>
+                                <input type="file" class="form-control" id="restaurant_image" name="restaurant_image" 
+                                       accept="image/*" style="display: none;">
+                                <button type="button" class="btn btn-outline-primary rounded-pill px-4" onclick="document.getElementById('restaurant_image').click()">
+                                    <i class="fas fa-upload me-2"></i>Choose Image
+                                </button>
+                            </div>
+                            <div class="form-text">
+                                Upload a high-quality image of your restaurant (max 5MB)
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="restaurant_name" class="form-label fw-medium">Restaurant Name</label>
                             <input type="text" class="form-control" id="restaurant_name" name="restaurant_name" 
                                    required placeholder="e.g. The Food Place" 
                                    value="{{ restaurant_name|default:'' }}">
@@ -34,9 +57,13 @@
                             </div>
                         </div>
                         
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Create Restaurant</button>
-                            <a href="{% url 'menu:my_restaurants' %}" class="btn btn-outline-secondary">Cancel</a>
+                        <div class="d-grid gap-3 mt-5">
+                            <button type="submit" class="btn btn-primary rounded-pill py-2">
+                                <i class="fas fa-plus-circle me-2"></i>Create Restaurant
+                            </button>
+                            <a href="{% url 'menu:my_restaurants' %}" class="btn btn-outline-secondary rounded-pill py-2">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
                         </div>
                     </form>
                 </div>
@@ -46,24 +73,153 @@
 </div>
 
 <style>
-    .card {
-        border: none;
-        border-radius: 10px;
+    body {
+        background-color: #f8f9fa;
     }
+    
+    .card {
+        border-radius: 15px;
+    }
+    
+    .image-upload-container {
+        border: 2px dashed #e2e8f0;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .image-upload-container:hover {
+        border-color: #0ea5e9;
+        background-color: #f0f9ff !important;
+    }
+    
+    .image-upload-container.dragover {
+        border-color: #0ea5e9;
+        background-color: #f0f9ff !important;
+    }
+    
     .btn-primary {
-        padding: 0.8rem;
+        background-color: #0ea5e9;
+        border-color: #0ea5e9;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0284c7;
+        border-color: #0284c7;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .btn-outline-primary {
+        color: #0ea5e9;
+        border-color: #0ea5e9;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: #0ea5e9;
+        border-color: #0ea5e9;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .btn-outline-secondary {
+        color: #64748b;
+        border-color: #e2e8f0;
+    }
+    
+    .btn-outline-secondary:hover {
+        background-color: #f1f5f9;
+        border-color: #e2e8f0;
+        color: #475569;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    .form-control {
+        border-color: #e2e8f0;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+    }
+    
+    .form-control:focus {
+        border-color: #0ea5e9;
+        box-shadow: 0 0 0 0.2rem rgba(14, 165, 233, 0.25);
     }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('form');
+    const imageInput = document.getElementById('restaurant_image');
+    const imagePreview = document.getElementById('imagePreview');
+    const preview = document.getElementById('preview');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const container = document.querySelector('.image-upload-container');
+
+    // Form validation
     form.addEventListener('submit', function(event) {
         if (!form.checkValidity()) {
             event.preventDefault();
             event.stopPropagation();
         }
         form.classList.add('was-validated');
+    });
+
+    // Image preview
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                alert('File size should not exceed 5MB');
+                imageInput.value = '';
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                uploadPlaceholder.style.display = 'none';
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Drag and drop functionality
+    container.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        container.classList.add('dragover');
+    });
+
+    container.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        container.classList.remove('dragover');
+    });
+
+    container.addEventListener('drop', function(e) {
+        e.preventDefault();
+        container.classList.remove('dragover');
+        
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                alert('File size should not exceed 5MB');
+                return;
+            }
+            
+            imageInput.files = e.dataTransfer.files;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                uploadPlaceholder.style.display = 'none';
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Click to upload
+    container.addEventListener('click', function() {
+        imageInput.click();
     });
 });
 </script>
