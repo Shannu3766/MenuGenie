@@ -28,17 +28,17 @@
         <div class="card-body d-flex justify-content-between align-items-center">
             <h5 class="card-title fw-bold mb-0" style="color: #1e293b;">Menu Actions</h5>
             <div class="d-flex gap-3">
-                <button class="btn btn-outline-primary rounded-circle action-btn" data-bs-toggle="modal" data-bs-target="#addItemModal" data-bs-toggle="tooltip" data-bs-placement="top" title="Add New Item">
-                    <i class="fas fa-plus-circle"></i>
-                        </button>
-                <button class="btn btn-outline-success rounded-circle action-btn" data-bs-toggle="modal" data-bs-target="#addSectionModal" data-bs-toggle="tooltip" data-bs-placement="top" title="Add New Section">
-                    <i class="fas fa-folder-plus"></i>
-                        </button>
-                <button class="btn btn-outline-info rounded-circle action-btn" data-bs-toggle="modal" data-bs-target="#uploadMenuModal" data-bs-toggle="tooltip" data-bs-placement="top" title="Upload Menu">
-                    <i class="fas fa-upload"></i>
-                        </button>
-                    </div>
-                </div>
+                <button class="btn btn-outline-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addItemModal">
+                    <i class="fas fa-plus-circle me-2"></i>Add New Item
+                </button>
+                <button class="btn btn-outline-success rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addSectionModal">
+                    <i class="fas fa-folder-plus me-2"></i>Add New Section
+                </button>
+                <button class="btn btn-outline-info rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#uploadMenuModal">
+                    <i class="fas fa-upload me-2"></i>Upload Menu
+                </button>
+            </div>
+        </div>
     </div>
 
             <!-- Menu Items -->
@@ -1180,6 +1180,7 @@
     .btn-outline-primary:hover {
         background-color: #0ea5e9;
         border-color: #0ea5e9;
+        color: white;
     }
     
     .form-control {
@@ -1298,39 +1299,6 @@
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
-    .btn-outline-primary {
-        color: #0ea5e9;
-        border-color: #0ea5e9;
-    }
-
-    .btn-outline-primary:hover {
-        background-color: #0ea5e9;
-        border-color: #0ea5e9;
-        color: white;
-    }
-
-    .btn-outline-danger {
-        color: #ef4444;
-        border-color: #ef4444;
-    }
-
-    .btn-outline-danger:hover {
-        background-color: #ef4444;
-        border-color: #ef4444;
-        color: white;
-    }
-
-    .btn-outline-warning {
-        color: #f59e0b;
-        border-color: #f59e0b;
-    }
-
-    .btn-outline-warning:hover {
-        background-color: #f59e0b;
-        border-color: #f59e0b;
-        color: white;
-    }
-
     .btn-outline-success {
         color: #10b981;
         border-color: #10b981;
@@ -1340,6 +1308,52 @@
         background-color: #10b981;
         border-color: #10b981;
         color: white;
+    }
+
+    .btn-outline-info {
+        color: #0ea5e9;
+        border-color: #0ea5e9;
+    }
+
+    .btn-outline-info:hover {
+        background-color: #0ea5e9;
+        border-color: #0ea5e9;
+        color: white;
+    }
+
+    /* Menu action button styles */
+    .menu-action-btn {
+        width: 45px;
+        height: 45px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        border-width: 2px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .menu-action-btn i {
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+    }
+
+    .menu-action-btn:hover {
+        width: auto;
+        padding: 0 20px;
+        border-radius: 22.5px !important;
+    }
+
+    .menu-action-btn:hover i {
+        margin-right: 8px;
+    }
+
+    .menu-action-btn:hover::after {
+        content: attr(data-title);
+        white-space: nowrap;
+        font-size: 0.9rem;
     }
 </style>
 {% endblock %}
