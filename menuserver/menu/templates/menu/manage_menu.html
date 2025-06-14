@@ -4,184 +4,286 @@
 
 {% block content %}
 <div class="container py-5">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h1 class="h2">{{ menu_link.restaurant_name }} - Menu Management</h1>
-                    <div class="d-flex align-items-center mt-2">
-                        <div class="input-group" style="max-width: 500px;">
-                            <input type="text" class="form-control" value="{{ request.scheme }}://{{ request.get_host }}{% url 'menu:public_menu' menu_link.user.id menu_link.restaurant_name %}" id="menuUrl" readonly>
-                            <button class="btn btn-outline-secondary" type="button" onclick="copyMenuUrl()">
-                                <i class="fas fa-copy"></i> Copy
+    <div class="row align-items-center mb-4">
+        <div class="col">
+            <h1 class="h2 fw-bold mb-0" style="color: #2c3e50;">{{ menu_link.restaurant_name }} - Menu Management</h1>
+            <div class="d-flex align-items-center mt-3">
+                <div class="input-group" style="max-width: 500px;">
+                    <input type="text" class="form-control" value="{{ request.scheme }}://{{ request.get_host }}{% url 'menu:public_menu' menu_link.user.id menu_link.restaurant_name|slugify %}" id="menuUrl" readonly>
+                    <button class="btn btn-outline-secondary border-start-0" type="button" onclick="copyMenuUrl(this)">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'menu:my_restaurants' %}" class="btn btn-outline-primary rounded-pill px-4 py-2">
+                <i class="fas fa-arrow-left me-2"></i>Back to Restaurants
+            </a>
+        </div>
+    </div>
+
+    <!-- Action Navbar -->
+    <div class="card border-0 shadow-sm mb-4 rounded-3">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <h5 class="card-title fw-bold mb-0" style="color: #1e293b;">Menu Actions</h5>
+            <div class="d-flex">
+                <button class="btn btn-primary rounded-pill px-4 me-2" data-bs-toggle="modal" data-bs-target="#addItemModal">
+                    <i class="fas fa-plus-circle me-2"></i>Add New Item
+                </button>
+                <button class="btn btn-success rounded-pill px-4 me-2" data-bs-toggle="modal" data-bs-target="#addSectionModal">
+                    <i class="fas fa-folder-plus me-2"></i>Add New Section
+                </button>
+                <button class="btn btn-info text-white rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#uploadMenuModal">
+                    <i class="fas fa-upload me-2"></i>Upload Menu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Items -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title fw-bold mb-4" style="color: #1e293b;">Menu Items</h5>
+            
+            {% if sections %}
+                {% for section in sections %}
+                    <div class="section mb-5 border-bottom pb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h3 class="h4 fw-bold mb-0" style="color: #2c3e50;">{{ section.name }}</h3>
+                            <button class="btn btn-danger btn-sm rounded-pill px-3 delete-section" data-section-id="{{ section.id }}">
+                                <i class="fas fa-trash me-2"></i>Delete Section
                             </button>
                         </div>
-                    </div>
-                </div>
-                <a href="{% url 'menu:my_restaurants' %}" class="btn btn-outline-primary">
-                    <i class="fas fa-arrow-left"></i> Back to Restaurants
-                </a>
-            </div>
-
-            <!-- Action Navbar -->
-            <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4 rounded shadow-sm">
-                <div class="container-fluid">
-                    <span class="navbar-brand">Menu Actions</span>
-                    <div class="d-flex">
-                        <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addItemModal">
-                            <i class="fas fa-plus"></i> Add New Item
-                        </button>
-                        <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#addSectionModal">
-                            <i class="fas fa-folder-plus"></i> Add New Section
-                        </button>
-                        <button class="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#uploadMenuModal">
-                            <i class="fas fa-upload"></i> Upload Menu
-                        </button>
-                    </div>
-                </div>
-            </nav>
-
-            <!-- Menu Items -->
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Menu Items</h5>
-                    
-                    {% if sections %}
-                        {% for section in sections %}
-                            <div class="section mb-4">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <div class="d-flex align-items-center">
-                                        <h3 class="h4 mb-0 me-3">{{ section.name }}</h3>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-danger delete-section" data-section-id="{{ section.id }}">
-                                                <i class="fas fa-trash"></i> Delete Section
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="table">
-                                        <thead>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Image</th>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Description</th>
+                                        <th scope="col">Price</th>
+                                        <th scope="col">Quantity</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in menu_items %}
+                                        {% if item.section == section %}
                                             <tr>
-                                                <th>Name</th>
-                                                <th>Description</th>
-                                                <th>Price</th>
-                                                <th>Quantity</th>
-                                                <th>Status</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for item in menu_items %}
-                                                {% if item.section == section %}
-                                                    <tr>
-                                                        <td>{{ item.name }}</td>
-                                                        <td>{{ item.description|default:"-" }}</td>
-                                                        <td>₹{{ item.price }}</td>
-                                                        <td>{{ item.quantity }}</td>
-                                                        <td>
-                                                            <span class="badge {% if item.is_available %}bg-success{% else %}bg-danger{% endif %}">
-                                                                {{ item.is_available|yesno:"Available,Unavailable" }}
-                                                            </span>
-                                                        </td>
-                                                        <td>
-                                                            <div class="btn-group">
-                                                                <a href="{% url 'menu:edit_item' menu_id=menu_link.id item_id=item.id %}" class="btn btn-sm btn-primary">
-                                                                    <i class="fas fa-edit"></i> Edit
-                                                                </a>
-                                                                <button class="btn btn-sm btn-danger delete-item" data-item-id="{{ item.id }}">
-                                                                    <i class="fas fa-trash"></i> Delete
-                                                                </button>
-                                                                <button class="btn btn-sm {% if item.is_available %}btn-warning{% else %}btn-success{% endif %} toggle-availability" data-item-id="{{ item.id }}">
-                                                                    <i class="fas {% if item.is_available %}fa-times{% else %}fa-check{% endif %}"></i>
-                                                                    {{ item.is_available|yesno:"Make Unavailable,Make Available" }}
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                {% endif %}
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-
-                    {% if unsectioned_items %}
-                        <div class="section mb-4">
-                            <h3 class="h4 mb-3">Unsectioned Items</h3>
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Description</th>
-                                            <th>Price</th>
-                                            <th>Quantity</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for item in unsectioned_items %}
-                                            <tr>
+                                                <td>
+                                                    {% if item.photo %}
+                                                        <img src="{{ item.photo.url }}" alt="{{ item.name }}" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
+                                                    {% else %}
+                                                        <i class="fas fa-image fa-2x text-muted"></i>
+                                                    {% endif %}
+                                                </td>
                                                 <td>{{ item.name }}</td>
                                                 <td>{{ item.description|default:"-" }}</td>
                                                 <td>₹{{ item.price }}</td>
                                                 <td>{{ item.quantity }}</td>
                                                 <td>
-                                                    <span class="badge {% if item.is_available %}bg-success{% else %}bg-danger{% endif %}">
+                                                    <span class="badge rounded-pill {% if item.is_available %}bg-success{% else %}bg-danger{% endif %} py-2 px-3">
                                                         {{ item.is_available|yesno:"Available,Unavailable" }}
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <div class="btn-group">
-                                                        <a href="{% url 'menu:edit_item' menu_id=menu_link.id item_id=item.id %}" class="btn btn-sm btn-primary">
+                                                    <div class="d-flex">
+                                                        <button class="btn btn-sm btn-primary me-2 rounded-pill edit-item-btn" 
+                                                                data-bs-toggle="modal" 
+                                                                data-bs-target="#editItemModal"
+                                                                data-item-id="{{ item.id }}"
+                                                                data-item-name="{{ item.name }}"
+                                                                data-item-description="{{ item.description|default:"" }}"
+                                                                data-item-price="{{ item.price }}"
+                                                                data-item-quantity="{{ item.quantity }}"
+                                                                data-item-section-id="{{ item.section.id|default:"" }}"
+                                                                data-item-photo-url="{% if item.photo %}{{ item.photo.url }}{% endif %}">
                                                             <i class="fas fa-edit"></i> Edit
-                                                        </a>
-                                                        <button class="btn btn-sm btn-danger delete-item" data-item-id="{{ item.id }}">
+                                                        </button>
+                                                        <button class="btn btn-sm btn-danger me-2 rounded-pill delete-item" data-item-id="{{ item.id }}">
                                                             <i class="fas fa-trash"></i> Delete
                                                         </button>
-                                                        <button class="btn btn-sm {% if item.is_available %}btn-warning{% else %}btn-success{% endif %} toggle-availability" data-item-id="{{ item.id }}">
+                                                        <button class="btn btn-sm {% if item.is_available %}btn-warning{% else %}btn-success{% endif %} rounded-pill toggle-availability" data-item-id="{{ item.id }}">
                                                             <i class="fas {% if item.is_available %}fa-times{% else %}fa-check{% endif %}"></i>
-                                                            {{ item.is_available|yesno:"Make Unavailable,Make Available" }}
+                                                            {{ item.is_available|yesno:"Unavail,Avail" }}
                                                         </button>
                                                     </div>
                                                 </td>
                                             </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
-                    {% endif %}
+                    </div>
+                {% endfor %}
+            {% endif %}
 
-                    {% if not sections and not unsectioned_items %}
-                        <p class="text-muted">No menu items added yet.</p>
-                    {% endif %}
+            {% if unsectioned_items %}
+                <div class="section mb-4">
+                    <h3 class="h4 fw-bold mb-3" style="color: #2c3e50;">Unsectioned Items</h3>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Image</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Description</th>
+                                    <th scope="col">Price</th>
+                                    <th scope="col">Quantity</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in unsectioned_items %}
+                                    <tr>
+                                        <td>
+                                            {% if item.photo %}
+                                                <img src="{{ item.photo.url }}" alt="{{ item.name }}" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
+                                            {% else %}
+                                                <i class="fas fa-image fa-2x text-muted"></i>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ item.name }}</td>
+                                        <td>{{ item.description|default:"-" }}</td>
+                                        <td>₹{{ item.price }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>
+                                            <span class="badge rounded-pill {% if item.is_available %}bg-success{% else %}bg-danger{% endif %} py-2 px-3">
+                                                {{ item.is_available|yesno:"Available,Unavailable" }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex">
+                                                <button class="btn btn-sm btn-primary me-2 rounded-pill edit-item-btn" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#editItemModal"
+                                                        data-item-id="{{ item.id }}"
+                                                        data-item-name="{{ item.name }}"
+                                                        data-item-description="{{ item.description|default:"" }}"
+                                                        data-item-price="{{ item.price }}"
+                                                        data-item-quantity="{{ item.quantity }}"
+                                                        data-item-section-id="{{ item.section.id|default:"" }}"
+                                                        data-item-photo-url="{% if item.photo %}{{ item.photo.url }}{% endif %}">
+                                                            <i class="fas fa-edit"></i> Edit
+                                                        </button>
+                                                <button class="btn btn-sm btn-danger me-2 rounded-pill delete-item" data-item-id="{{ item.id }}">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </button>
+                                                <button class="btn btn-sm {% if item.is_available %}btn-warning{% else %}btn-success{% endif %} rounded-pill toggle-availability" data-item-id="{{ item.id }}">
+                                                    <i class="fas {% if item.is_available %}fa-times{% else %}fa-check{% endif %}"></i>
+                                                    {{ item.is_available|yesno:"Unavail,Avail" }}
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
+            {% endif %}
+
+            {% if not sections and not unsectioned_items %}
+                <div class="text-center py-5">
+                    <div class="alert alert-info border-0 shadow-sm mb-4">
+                        <h4 class="alert-heading fw-bold mb-2">No Menu Items Yet!</h4>
+                        <p class="mb-0">You haven't added any menu items or sections yet. Start by adding one!</p>
+                    </div>
+                    <button class="btn btn-primary rounded-pill px-4 py-2" data-bs-toggle="modal" data-bs-target="#addItemModal">
+                        <i class="fas fa-plus-circle me-2"></i>Add Your First Item
+                    </button>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
 
 <!-- Add Item Modal -->
-<div class="modal fade" id="addItemModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Add New Item</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 900px;">
+        <div class="modal-content rounded-3 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="addItemModalLabel">Add New Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <form method="post" enctype="multipart/form-data">
+            <div class="modal-body px-4 pt-0 pb-4">
+                <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                     {% csrf_token %}
-                    {{ form.as_p }}
-                    <div class="text-end mt-3">
-                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Add Item
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label class="form-label fw-medium">Item Photo</label>
+                                <div class="image-upload-container text-center p-4 border rounded-3 mb-2" style="background-color: #f8fafc;">
+                                    <div id="addItemImagePreview" class="mb-3" style="display: none;">
+                                        <img id="addItemPreview" src="#" alt="Preview" class="img-fluid rounded-3" style="max-height: 200px;">
+                                    </div>
+                                    <div id="addItemUploadPlaceholder" class="py-4">
+                                        <i class="fas fa-cloud-upload-alt fa-3x mb-3" style="color: #94a3b8;"></i>
+                                        <p class="mb-2" style="color: #64748b;">Drag and drop item image here</p>
+                                        <p class="small text-muted mb-0">or</p>
+                                    </div>
+                                    <input type="file" class="form-control" id="add_item_photo" name="photo" accept="image/*" style="display: none;">
+                                    <button type="button" class="btn btn-outline-primary rounded-pill px-4" onclick="document.getElementById('add_item_photo').click()">
+                                        <i class="fas fa-upload me-2"></i>Choose Image
+                                    </button>
+                                </div>
+                                <div class="form-text">Upload a high-quality image of your menu item (max 5MB)</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            {% for field in form %}
+                                {% if field.name != 'photo' %}
+                                    <div class="mb-3">
+                                        <label for="{{ field.id_for_label }}" class="form-label fw-medium">{{ field.label }}</label>
+                                        {% if field.name == 'name' %}
+                                            <div class="input-group has-validation">
+                                                <span class="input-group-text"><i class="fas fa-utensils"></i></span>
+                                                {{ field }}
+                                            </div>
+                                        {% elif field.name == 'description' %}
+                                            <div class="input-group has-validation">
+                                                <span class="input-group-text"><i class="fas fa-info-circle"></i></span>
+                                                {{ field }}
+                                            </div>
+                                        {% elif field.name == 'price' %}
+                                            <div class="input-group has-validation">
+                                                <span class="input-group-text"><i class="fas fa-rupee-sign"></i></span>
+                                                {{ field }}
+                                            </div>
+                                        {% elif field.name == 'quantity' %}
+                                            <div class="input-group has-validation">
+                                                <span class="input-group-text"><i class="fas fa-sort-numeric-up"></i></span>
+                                                {{ field }}
+                                            </div>
+                                        {% elif field.name == 'section' %}
+                                            <div class="input-group has-validation">
+                                                <span class="input-group-text"><i class="fas fa-folder"></i></span>
+                                                {{ field }}
+                                            </div>
+                                        {% else %}
+                                            {{ field }}
+                                        {% endif %}
+                                        {% if field.help_text %}
+                                            <div class="form-text">{{ field.help_text }}</div>
+                                        {% endif %}
+                                        {% for error in field.errors %}
+                                            <div class="text-danger">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end pt-3">
+                        <button type="button" class="btn btn-light rounded-pill px-4 me-2" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4">
+                            <i class="fas fa-plus-circle me-2"></i>Add Item
                         </button>
                     </div>
                 </form>
@@ -191,21 +293,29 @@
 </div>
 
 <!-- Add Section Modal -->
-<div class="modal fade" id="addSectionModal" tabindex="-1">
+<div class="modal fade" id="addSectionModal" tabindex="-1" aria-labelledby="addSectionModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Add New Section</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="modal-content rounded-3 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="addSectionModalLabel">Add New Section</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body px-4 pt-0 pb-4">
                 <form method="post" action="{% url 'menu:add_section' menu_id=menu_link.id %}">
                     {% csrf_token %}
-                    {{ section_form.as_p }}
-                    <div class="text-end mt-3">
-                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-plus"></i> Add Section
+                    {% for field in section_form %}
+                        <div class="mb-3">
+                            {{ field.label_tag }}
+                            {{ field }}
+                            {% for error in field.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    <div class="d-flex justify-content-end pt-3">
+                        <button type="button" class="btn btn-light rounded-pill px-4 me-2" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success rounded-pill px-4">
+                            <i class="fas fa-folder-plus me-2"></i>Add Section
                         </button>
                     </div>
                 </form>
@@ -215,21 +325,110 @@
 </div>
 
 <!-- Upload Menu Modal -->
-<div class="modal fade" id="uploadMenuModal" tabindex="-1">
+<div class="modal fade" id="uploadMenuModal" tabindex="-1" aria-labelledby="uploadMenuModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Upload Menu Image</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="modal-content rounded-3 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="uploadMenuModalLabel">Upload Menu Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <form method="post" enctype="multipart/form-data">
+            <div class="modal-body px-4 pt-0 pb-4">
+                <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                     {% csrf_token %}
-                    {{ upload_form.as_p }}
-                    <div class="text-end mt-3">
-                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-info text-white">
-                            <i class="fas fa-upload"></i> Upload and Extract
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-medium">Menu Image</label>
+                        <div class="image-upload-container text-center p-4 border rounded-3 mb-2" style="background-color: #f8fafc;">
+                            <div id="uploadMenuImagePreview" class="mb-3" style="display: none;">
+                                <img id="uploadMenuPreview" src="#" alt="Preview" class="img-fluid rounded-3" style="max-height: 200px;">
+                            </div>
+                            <div id="uploadMenuUploadPlaceholder" class="py-4">
+                                <i class="fas fa-cloud-upload-alt fa-3x mb-3" style="color: #94a3b8;"></i>
+                                <p class="mb-2" style="color: #64748b;">Drag and drop your menu image here</p>
+                                <p class="small text-muted mb-0">or</p>
+                            </div>
+                            <input type="file" class="form-control" id="upload_menu_image" name="menu_image" accept="image/*" style="display: none;" required>
+                            <button type="button" class="btn btn-outline-primary rounded-pill px-4" onclick="document.getElementById('upload_menu_image').click()">
+                                <i class="fas fa-upload me-2"></i>Choose Image
+                            </button>
+                        </div>
+                        <div class="form-text">Upload an image of your menu to extract items (max 5MB)</div>
+                        <div class="invalid-feedback">Please select a menu image.</div>
+                    </div>
+
+                    <div class="d-flex justify-content-end pt-3">
+                        <button type="button" class="btn btn-light rounded-pill px-4 me-2" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-info text-white rounded-pill px-4">
+                            <i class="fas fa-upload me-2"></i>Upload and Extract
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Item Modal -->
+<div class="modal fade" id="editItemModal" tabindex="-1" aria-labelledby="editItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="editItemModalLabel">Edit Menu Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-4 pt-0 pb-4">
+                <form id="editItemForm" method="post" enctype="multipart/form-data" action=""> {# Action will be set by JS #}
+                    {% csrf_token %}
+                    <input type="hidden" id="edit-item-id" name="item_id">
+
+                    <div class="mb-3">
+                        <label for="edit-item-name" class="form-label">Item Name</label>
+                        <input type="text" class="form-control" id="edit-item-name" name="name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit-item-description" class="form-label">Description</label>
+                        <textarea class="form-control" id="edit-item-description" name="description" rows="3"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit-item-price" class="form-label">Price</label>
+                        <input type="number" step="0.01" class="form-control" id="edit-item-price" name="price" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit-item-quantity" class="form-label">Quantity</label>
+                        <input type="number" class="form-control" id="edit-item-quantity" name="quantity" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit-item-section" class="form-label">Section</label>
+                        <select class="form-select" id="edit-item-section" name="section">
+                            <option value="">No Section</option>
+                            {% for section in sections %}
+                                <option value="{{ section.id }}">{{ section.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="edit-item-is-available" name="is_available">
+                            <label class="form-check-label" for="edit-item-is-available">Available</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit-item-photo" class="form-label">Item Photo</label>
+                        <input type="file" class="form-control" id="edit-item-photo" name="photo">
+                        <small class="form-text text-muted">Leave blank to keep current photo.</small>
+                        <div id="edit-current-photo" class="mt-2"></div>
+                    </div>
+
+                    <div class="d-flex justify-content-end pt-3">
+                        <button type="button" class="btn btn-light rounded-pill px-4 me-2" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4">
+                            <i class="fas fa-save me-2"></i>Save Changes
                         </button>
                     </div>
                 </form>
@@ -239,38 +438,42 @@
 </div>
 
 <!-- Delete Item Confirmation Modal -->
-<div class="modal fade" id="deleteItemModal" tabindex="-1">
+<div class="modal fade" id="deleteItemModal" tabindex="-1" aria-labelledby="deleteItemModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Confirm Delete</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="modal-content rounded-3 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="deleteItemModalLabel">Confirm Delete Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete this item?</p>
+            <div class="modal-body px-4 pt-0 pb-4">
+                <p class="mb-0">Are you sure you want to delete this item? This action cannot be undone.</p>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteItem">Delete</button>
+            <div class="modal-footer border-0 pt-0 justify-content-end">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger rounded-pill px-4" id="confirmDeleteItem">
+                    <i class="fas fa-trash-alt me-2"></i>Delete
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Delete Section Confirmation Modal -->
-<div class="modal fade" id="deleteSectionModal" tabindex="-1">
+<div class="modal fade" id="deleteSectionModal" tabindex="-1" aria-labelledby="deleteSectionModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Confirm Delete Section</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="modal-content rounded-3 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="deleteSectionModalLabel">Confirm Delete Section</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete this section and all its items? This action cannot be undone.</p>
+            <div class="modal-body px-4 pt-0 pb-4">
+                <p class="mb-0">Are you sure you want to delete this section and all its items? This action cannot be undone.</p>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteSection">Delete</button>
+            <div class="modal-footer border-0 pt-0 justify-content-end">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger rounded-pill px-4" id="confirmDeleteSection">
+                    <i class="fas fa-trash-alt me-2"></i>Delete
+                </button>
             </div>
         </div>
     </div>
@@ -280,18 +483,21 @@
 
 {% block extra_js %}
 <script>
-    function copyMenuUrl() {
+    function copyMenuUrl(button) {
         var menuUrl = document.getElementById('menuUrl');
         menuUrl.select();
         menuUrl.setSelectionRange(0, 99999);
         navigator.clipboard.writeText(menuUrl.value);
         
         // Show feedback
-        var copyBtn = menuUrl.nextElementSibling;
-        var originalText = copyBtn.innerHTML;
-        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        var originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        button.classList.remove('btn-outline-secondary');
+        button.classList.add('btn-success');
         setTimeout(function() {
-            copyBtn.innerHTML = originalText;
+            button.innerHTML = originalText;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-secondary');
         }, 2000);
     }
 
@@ -357,12 +563,521 @@
             });
         });
 
+        // Edit item - populate modal when button is clicked
+        $('.edit-item-btn').click(function() {
+            const itemId = $(this).data('item-id');
+            const itemName = $(this).data('item-name');
+            const itemDescription = $(this).data('item-description');
+            const itemPrice = $(this).data('item-price');
+            const itemQuantity = $(this).data('item-quantity');
+            const itemSectionId = $(this).data('item-section-id');
+            const itemPhotoUrl = $(this).data('item-photo-url');
+
+            // Populate form fields
+            $('#edit-item-id').val(itemId);
+            $('#edit-item-name').val(itemName);
+            $('#edit-item-description').val(itemDescription);
+            $('#edit-item-price').val(itemPrice);
+            $('#edit-item-quantity').val(itemQuantity);
+            $('#edit-item-is-available').prop('checked', true); // Always set to true
+            $('#edit-item-section').val(itemSectionId);
+
+            // Display current photo if exists
+            const currentPhotoDiv = $('#edit-current-photo');
+            currentPhotoDiv.empty(); // Clear previous photo
+            if (itemPhotoUrl) {
+                currentPhotoDiv.append(`<img src="${itemPhotoUrl}" alt="Current Photo" class="img-thumbnail" style="max-width: 100px; max-height: 100px;">`);
+            }
+
+            // Set form action dynamically
+            const formAction = "{% url 'menu:edit_item' menu_id=menu_link.id item_id=0 %}".replace('0', itemId);
+            $('#editItemForm').attr('action', formAction);
+        });
+
+        // Handle edit form submission via AJAX
+        $('#editItemForm').submit(function(e) {
+            e.preventDefault(); // Prevent default form submission
+            const form = $(this);
+            const formData = new FormData(form[0]);
+
+            $.ajax({
+                url: form.attr('action'),
+                type: form.attr('method'),
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.status === 'success') {
+                        $('#editItemModal').modal('hide');
+                        // Update the table row directly with the new data
+                        const updatedItem = response.item;
+                        const row = $(`tr[data-item-id="${updatedItem.id}"]`);
+                        if (row.length) {
+                            // Update cells
+                            row.find('td:eq(0)').html(updatedItem.photo_url ? `<img src="${updatedItem.photo_url}" alt="${updatedItem.name}" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">` : '<i class="fas fa-image fa-2x text-muted"></i>');
+                            row.find('td:eq(1)').text(updatedItem.name);
+                            row.find('td:eq(2)').text(updatedItem.description || '-');
+                            row.find('td:eq(3)').text(`₹${updatedItem.price}`);
+                            row.find('td:eq(4)').text(updatedItem.quantity);
+                            const statusBadge = `<span class="badge rounded-pill ${updatedItem.is_available ? 'bg-success' : 'bg-danger'} py-2 px-3">
+                                                    ${updatedItem.is_available ? 'Available' : 'Unavailable'}
+                                                 </span>`;
+                            row.find('td:eq(5)').html(statusBadge);
+
+                            // Update toggle availability button text and class
+                            const toggleBtn = row.find('.toggle-availability');
+                            if (updatedItem.is_available) {
+                                toggleBtn.removeClass('btn-success').addClass('btn-warning').html('<i class="fas fa-times"></i> Unavail');
+                            } else {
+                                toggleBtn.removeClass('btn-warning').addClass('btn-success').html('<i class="fas fa-check"></i> Avail');
+                            }
+                        }
+                        // Optionally, show a temporary success message
+                        // messages.success(request, response.message); // Not directly supported by client-side JS
+                    } else {
+                        alert(response.message || 'An unknown error occurred.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // Parse and display validation errors
+                    try {
+                        const errorResponse = JSON.parse(xhr.responseText);
+                        if (errorResponse.errors) {
+                            const errors = JSON.parse(errorResponse.errors);
+                            $('.modal-body .text-danger').remove(); // Clear previous errors
+                            $('.modal-body .form-control').removeClass('is-invalid');
+
+                            for (const fieldName in errors) {
+                                const fieldErrors = errors[fieldName];
+                                const inputField = $(`#edit-item-${fieldName.replace(/_/g, '-')}`);
+                                inputField.addClass('is-invalid');
+                                fieldErrors.forEach(err => {
+                                    inputField.after(`<div class="text-danger">${err.message}</div>`);
+                                });
+                            }
+                        } else {
+                            alert(errorResponse.message || 'Error saving item: An unknown error occurred.');
+                        }
+                    } catch (e) {
+                        alert('Error saving item: ' + xhr.responseText);
+                    }
+                }
+            });
+        });
+
         // Clear form fields when modal is closed
         $('.modal').on('hidden.bs.modal', function() {
             $(this).find('form')[0].reset();
             itemToDelete = null;
             sectionToDelete = null;
+            // Clear photo preview as well
+            $('#edit-current-photo').empty();
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const addItemForm = document.querySelector('#addItemModal form');
+        const addItemImageInput = document.getElementById('add_item_photo');
+        const addItemImagePreviewDiv = document.getElementById('addItemImagePreview');
+        const addItemPreviewImg = document.getElementById('addItemPreview');
+        const addItemUploadPlaceholder = document.getElementById('addItemUploadPlaceholder');
+        const addItemContainer = document.querySelector('#addItemModal .image-upload-container');
+
+        // Handle Add Item form submission via AJAX
+        addItemForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const form = event.target;
+            const formData = new FormData(form);
+
+            $.ajax({
+                url: form.action,
+                type: form.method,
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.status === 'success') {
+                        $('#addItemModal').modal('hide');
+                        location.reload(); // Reload page to reflect new item in table
+                    } else {
+                        alert(response.message || 'An unknown error occurred.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    try {
+                        const errorResponse = JSON.parse(xhr.responseText);
+                        if (errorResponse.errors) {
+                            const errors = JSON.parse(errorResponse.errors);
+                            // Clear previous errors and invalid states
+                            $('#addItemModal .text-danger').remove();
+                            $('#addItemModal .form-control').removeClass('is-invalid');
+                            $('#addItemModal .form-select').removeClass('is-invalid');
+
+                            for (const fieldName in errors) {
+                                const fieldErrors = errors[fieldName];
+                                const inputField = $(`#addItemModal #id_${fieldName}`);
+                                inputField.addClass('is-invalid');
+                                fieldErrors.forEach(err => {
+                                    inputField.after(`<div class="text-danger">${err.message}</div>`);
+                                });
+                            }
+                        } else {
+                            alert(errorResponse.message || 'Error adding item: An unknown error occurred.');
+                        }
+                    } catch (e) {
+                        alert('Error adding item: ' + xhr.responseText);
+                    }
+                }
+            });
+        });
+
+        // Image preview for Add Item Modal
+        addItemImageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                    alert('File size should not exceed 5MB');
+                    addItemImageInput.value = '';
+                    addItemImagePreviewDiv.style.display = 'none';
+                    addItemUploadPlaceholder.style.display = 'block';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    addItemPreviewImg.src = e.target.result;
+                    addItemImagePreviewDiv.style.display = 'block';
+                    addItemUploadPlaceholder.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Drag and drop functionality for Add Item Modal
+        addItemContainer.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            addItemContainer.classList.add('dragover');
+        });
+
+        addItemContainer.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            addItemContainer.classList.remove('dragover');
+        });
+
+        addItemContainer.addEventListener('drop', function(e) {
+            e.preventDefault();
+            addItemContainer.classList.remove('dragover');
+            
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                    alert('File size should not exceed 5MB');
+                    return;
+                }
+                
+                addItemImageInput.files = e.dataTransfer.files;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    addItemPreviewImg.src = e.target.result;
+                    addItemImagePreviewDiv.style.display = 'block';
+                    addItemUploadPlaceholder.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Click to upload for Add Item Modal
+        addItemContainer.addEventListener('click', function() {
+            addItemImageInput.click();
+        });
+
+        // Reset Add Item modal on close
+        $('#addItemModal').on('hidden.bs.modal', function() {
+            addItemForm.reset();
+            addItemImagePreviewDiv.style.display = 'none';
+            addItemUploadPlaceholder.style.display = 'block';
+            addItemForm.classList.remove('was-validated'); // Remove validation styles
+            // Clear previous errors and invalid states on modal close
+            $('#addItemModal .text-danger').remove();
+            $('#addItemModal .form-control').removeClass('is-invalid');
+            $('#addItemModal .form-select').removeClass('is-invalid');
+        });
+
+        // Upload Menu Modal JavaScript
+        const uploadMenuForm = document.querySelector('#uploadMenuModal form');
+        const uploadMenuImageInput = document.getElementById('upload_menu_image');
+        const uploadMenuImagePreviewDiv = document.getElementById('uploadMenuImagePreview');
+        const uploadMenuPreviewImg = document.getElementById('uploadMenuPreview');
+        const uploadMenuUploadPlaceholder = document.getElementById('uploadMenuUploadPlaceholder');
+        const uploadMenuContainer = document.querySelector('#uploadMenuModal .image-upload-container');
+
+        // Handle Upload Menu form submission via AJAX
+        uploadMenuForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const form = event.target;
+            const formData = new FormData(form);
+
+            $.ajax({
+                url: form.action,
+                type: form.method,
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.status === 'success') {
+                        $('#uploadMenuModal').modal('hide');
+                        location.reload(); // Reload page to reflect changes from menu extraction
+                    } else {
+                        alert(response.message || 'An unknown error occurred during upload.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    try {
+                        const errorResponse = JSON.parse(xhr.responseText);
+                        if (errorResponse.errors) {
+                            const errors = JSON.parse(errorResponse.errors);
+                            $('#uploadMenuModal .text-danger').remove();
+                            $('#uploadMenuModal .form-control').removeClass('is-invalid');
+
+                            for (const fieldName in errors) {
+                                const fieldErrors = errors[fieldName];
+                                const inputField = $(`#uploadMenuModal #id_${fieldName}`);
+                                inputField.addClass('is-invalid');
+                                fieldErrors.forEach(err => {
+                                    inputField.after(`<div class="text-danger">${err.message}</div>`);
+                                });
+                            }
+                        } else {
+                            alert(errorResponse.message || 'Error uploading menu: An unknown error occurred.');
+                        }
+                    } catch (e) {
+                        alert('Error uploading menu: ' + xhr.responseText);
+                    }
+                }
+            });
+        });
+
+        // Image preview for Upload Menu Modal
+        uploadMenuImageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                    alert('File size should not exceed 5MB');
+                    uploadMenuImageInput.value = '';
+                    uploadMenuImagePreviewDiv.style.display = 'none';
+                    uploadMenuUploadPlaceholder.style.display = 'block';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadMenuPreviewImg.src = e.target.result;
+                    uploadMenuImagePreviewDiv.style.display = 'block';
+                    uploadMenuUploadPlaceholder.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Drag and drop functionality for Upload Menu Modal
+        uploadMenuContainer.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadMenuContainer.classList.add('dragover');
+        });
+
+        uploadMenuContainer.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadMenuContainer.classList.remove('dragover');
+        });
+
+        uploadMenuContainer.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadMenuContainer.classList.remove('dragover');
+            
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                    alert('File size should not exceed 5MB');
+                    return;
+                }
+                
+                uploadMenuImageInput.files = e.dataTransfer.files;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadMenuPreviewImg.src = e.target.result;
+                    uploadMenuImagePreviewDiv.style.display = 'block';
+                    uploadMenuUploadPlaceholder.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Click to upload for Upload Menu Modal
+        uploadMenuContainer.addEventListener('click', function() {
+            uploadMenuImageInput.click();
+        });
+
+        // Reset Upload Menu modal on close
+        $('#uploadMenuModal').on('hidden.bs.modal', function() {
+            uploadMenuForm.reset();
+            uploadMenuImagePreviewDiv.style.display = 'none';
+            uploadMenuUploadPlaceholder.style.display = 'block';
+            uploadMenuForm.classList.remove('was-validated'); // Remove validation styles
+            $('#uploadMenuModal .text-danger').remove();
+            $('#uploadMenuModal .form-control').removeClass('is-invalid');
         });
     });
 </script>
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    
+    .card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        border-radius: 15px;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    
+    .btn {
+        transition: all 0.2s ease-in-out;
+        font-weight: 500;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .btn-primary {
+        background-color: #0ea5e9;
+        border-color: #0ea5e9;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0284c7;
+        border-color: #0284c7;
+    }
+    
+    .btn-success {
+        background-color: #10b981;
+        border-color: #10b981;
+    }
+    
+    .btn-success:hover {
+        background-color: #059669;
+        border-color: #059669;
+    }
+    
+    .btn-outline-primary {
+        color: #0ea5e9;
+        border-color: #0ea5e9;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: #0ea5e9;
+        border-color: #0ea5e9;
+    }
+    
+    .form-control {
+        border-radius: 8px;
+        border-color: #e2e8f0;
+    }
+    
+    .form-control:focus {
+        border-color: #0ea5e9;
+        box-shadow: 0 0 0 0.2rem rgba(14, 165, 233, 0.25);
+    }
+    
+    .alert-info {
+        background-color: #f0f9ff;
+        color: #0369a1;
+        border-radius: 12px;
+    }
+    
+    .card-title {
+        color: #1e293b;
+    }
+    
+    .text-muted {
+        color: #64748b !important;
+    }
+
+    /* Modal field styling */
+    .modal-body .form-text {
+        font-size: 0.875em;
+        color: #6c757d;
+    }
+
+    .modal-body .text-danger {
+        font-size: 0.875em;
+    }
+
+    /* Styles matching register_step4.html */
+    .modal .form-label {
+        color: #333; /* Darker label color */
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .modal .form-control {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        height: auto;
+        background-color: #fcfcfc;
+    }
+
+    .modal .form-control:focus {
+        border-color: #0ea5e9;
+        box-shadow: 0 0 0 0.2rem rgba(14, 165, 233, 0.25);
+    }
+
+    .modal .input-group-text {
+        background-color: #fff;
+        border: 1px solid #e0e0e0;
+        border-right: none;
+        color: #9e9e9e;
+        padding: 0.75rem 1rem;
+        border-radius: 8px 0 0 8px !important;
+    }
+
+    .modal .input-group .form-control {
+        border-left: none;
+    }
+
+    /* Ensure specific border-radius for form-control within input-group */
+    .modal .input-group .form-control:not(:first-child) {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    /* Specific for textarea */
+    .modal textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    /* Checkbox styling */
+    .modal .form-check-input {
+        border-color: #ccc;
+        margin-top: 0.2rem;
+    }
+
+    .modal .form-check-input:checked {
+        background-color: #0ea5e9;
+        border-color: #0ea5e9;
+    }
+
+    .modal .form-check-label {
+        color: #666;
+        margin-left: 0.5rem;
+    }
+</style>
 {% endblock %}

@@ -156,8 +156,16 @@ def manage_menu(request, menu_id):
             menu_item = form.save(commit=False)
             menu_item.menu = menu_link
             menu_item.save()
-            messages.success(request, 'Menu item added successfully!')
-            return redirect('menu:manage_menu', menu_id=menu_id)
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Menu item added successfully!'
+            })
+        else:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Error adding menu item.',
+                'errors': form.errors.as_json()
+            }, status=400)
     else:
         form = MenuItemForm()
     
@@ -225,10 +233,31 @@ def edit_menu_item(request, menu_id, item_id):
     if request.method == 'POST':
         form = MenuItemForm(request.POST, request.FILES, instance=menu_item)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Menu item updated successfully!')
-            return redirect('menu:manage_menu', menu_id=menu_id)
+            updated_item = form.save()
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Menu item updated successfully!',
+                'item': {
+                    'id': updated_item.id,
+                    'name': updated_item.name,
+                    'description': updated_item.description,
+                    'price': str(updated_item.price), # Convert Decimal to string for JSON
+                    'quantity': updated_item.quantity,
+                    'is_available': updated_item.is_available,
+                    'photo_url': updated_item.photo.url if updated_item.photo else None,
+                    'section_id': updated_item.section.id if updated_item.section else None,
+                }
+            })
+        else:
+            # Return form errors as JSON
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Error updating menu item.',
+                'errors': form.errors.as_json()
+            }, status=400)
     else:
+        # This part will no longer be directly used for rendering the modal content,
+        # but it's good to keep it consistent if it's still used elsewhere.
         form = MenuItemForm(instance=menu_item)
     
     return render(request, 'menu/edit_menu_item.html', {
