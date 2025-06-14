@@ -1,29 +1,29 @@
 {% extends 'base.html' %}
 
-{% block title %}Manage Menu - {{ menu_link.restaurant_name }}{% endblock %}
+{% block title %}Manage Menu - {{ menu_link.restaurant.name }}{% endblock %}
 
 {% block content %}
 <div class="container py-5">
     <div class="row align-items-center mb-4">
         <div class="col">
-            <h1 class="h2 fw-bold mb-0" style="color: #2c3e50;">{{ menu_link.restaurant_name }} - Menu Management</h1>
+            <h1 class="h2 fw-bold mb-0" style="color: #2c3e50;">{{ menu_link.restaurant.name }} - Menu Management</h1>
             <div class="d-flex align-items-center mt-3">
-                        <div class="input-group" style="max-width: 500px;">
-                    <input type="text" class="form-control" value="{{ request.scheme }}://{{ request.get_host }}{% url 'menu:public_menu' menu_link.user.id menu_link.restaurant_name|slugify %}" id="menuUrl" readonly>
+                <div class="input-group" style="max-width: 500px;">
+                    <input type="text" class="form-control" value="{{ request.scheme }}://{{ request.get_host }}{% url 'menu:public_menu' menu_link.user.id menu_link.restaurant.name|slugify %}" id="menuUrl" readonly>
                     <button class="btn btn-outline-secondary border-start-0" type="button" onclick="copyMenuUrl(this)">
                         <i class="fas fa-copy"></i>
-                            </button>
-                        </div>
-                    </div>
+                    </button>
                 </div>
+            </div>
+        </div>
         <div class="col-auto">
             <a href="{% url 'menu:my_restaurants' %}" class="btn btn-outline-primary rounded-pill px-4 py-2">
                 <i class="fas fa-arrow-left me-2"></i>Back to Restaurants
-                </a>
+            </a>
         </div>
-            </div>
+    </div>
 
-            <!-- Action Navbar -->
+    <!-- Action Navbar -->
     <div class="card border-0 shadow-sm mb-4 rounded-3">
         <div class="card-body d-flex justify-content-between align-items-center">
             <h5 class="card-title fw-bold mb-0" style="color: #1e293b;">Menu Actions</h5>
@@ -41,104 +41,24 @@
         </div>
     </div>
 
-            <!-- Menu Items -->
+    <!-- Menu Items -->
     <div class="card border-0 shadow-sm">
-                <div class="card-body">
+        <div class="card-body">
             <h5 class="card-title fw-bold mb-4" style="color: #1e293b;">Menu Items</h5>
-                    
-                    {% if sections %}
-                        {% for section in sections %}
-                    <div class="section mb-5 border-bottom pb-4">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h3 class="h4 fw-bold mb-0" style="color: #2c3e50;">{{ section.name }}</h3>
-                            <button class="btn btn-danger btn-sm rounded-pill px-3 delete-section" data-section-id="{{ section.id }}">
-                                <i class="fas fa-trash me-2"></i>Delete Section
-                                            </button>
-                                </div>
-                                <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                        <thead>
-                                            <tr>
-                                        <th scope="col">Image</th>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Description</th>
-                                        <th scope="col">Price</th>
-                                        <th scope="col">Quantity</th>
-                                        <th scope="col">Status</th>
-                                        <th scope="col">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for item in menu_items %}
-                                                {% if item.section == section %}
-                                                    <tr>
-                                                <td>
-                                                    {% if item.photo %}
-                                                        <img src="{{ item.photo.url }}" alt="{{ item.name }}" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
-                                                    {% else %}
-                                                        <i class="fas fa-image fa-2x text-muted"></i>
-                                                    {% endif %}
-                                                </td>
-                                                        <td>{{ item.name }}</td>
-                                                        <td>{{ item.description|default:"-" }}</td>
-                                                        <td>₹{{ item.price }}</td>
-                                                        <td>{{ item.quantity }}</td>
-                                                        <td>
-                                                    <span class="badge rounded-pill {% if item.is_available %}bg-success{% else %}bg-danger{% endif %} py-2 px-3">
-                                                                {{ item.is_available|yesno:"Available,Unavailable" }}
-                                                            </span>
-                                                        </td>
-                                                        <td>
-                                                    <div class="d-flex gap-2">
-                                                        <button class="btn btn-sm btn-outline-primary rounded-circle action-btn edit-item-btn" 
-                                                                data-bs-toggle="modal" 
-                                                                data-bs-target="#editItemModal"
-                                                                data-item-id="{{ item.id }}"
-                                                                data-item-name="{{ item.name }}"
-                                                                data-item-description="{{ item.description|default:"" }}"
-                                                                data-item-price="{{ item.price }}"
-                                                                data-item-quantity="{{ item.quantity }}"
-                                                                data-item-section-id="{{ item.section.id|default:"" }}"
-                                                                data-item-photo-url="{% if item.photo %}{{ item.photo.url }}{% endif %}"
-                                                                data-item-is-available="{{ item.is_available }}"
-                                                                data-bs-toggle="tooltip" 
-                                                                data-bs-placement="top" 
-                                                                title="Edit Item">
-                                                                    <i class="fas fa-edit"></i>
-                                                        </button>
-                                                        <button class="btn btn-sm btn-outline-danger rounded-circle action-btn delete-item" 
-                                                                data-item-id="{{ item.id }}"
-                                                                data-bs-toggle="tooltip" 
-                                                                data-bs-placement="top" 
-                                                                title="Delete Item">
-                                                                    <i class="fas fa-trash"></i>
-                                                        </button>
-                                                        <button class="btn btn-sm {% if item.is_available %}btn-outline-warning{% else %}btn-outline-success{% endif %} rounded-circle action-btn toggle-availability" 
-                                                                data-item-id="{{ item.id }}"
-                                                                data-bs-toggle="tooltip" 
-                                                                data-bs-placement="top" 
-                                                                title="{% if item.is_available %}Make Unavailable{% else %}Make Available{% endif %}">
-                                                                    <i class="fas {% if item.is_available %}fa-times{% else %}fa-check{% endif %}"></i>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                                {% endif %}
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-
-                    {% if unsectioned_items %}
-                        <div class="section mb-4">
-                    <h3 class="h4 fw-bold mb-3" style="color: #2c3e50;">Unsectioned Items</h3>
-                            <div class="table-responsive">
+            
+            {% if sections %}
+                {% for section in sections %}
+                <div class="section mb-5 border-bottom pb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="h4 fw-bold mb-0" style="color: #2c3e50;">{{ section.name }}</h3>
+                        <button class="btn btn-danger btn-sm rounded-pill px-3 delete-section" data-section-id="{{ section.id }}">
+                            <i class="fas fa-trash me-2"></i>Delete Section
+                        </button>
+                    </div>
+                    <div class="table-responsive">
                         <table class="table table-hover align-middle">
-                                    <thead>
-                                        <tr>
+                            <thead>
+                                <tr>
                                     <th scope="col">Image</th>
                                     <th scope="col">Name</th>
                                     <th scope="col">Description</th>
@@ -146,11 +66,91 @@
                                     <th scope="col">Quantity</th>
                                     <th scope="col">Status</th>
                                     <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in menu_items %}
+                                    {% if item.section == section %}
+                                        <tr>
+                                            <td>
+                                                {% if item.photo %}
+                                                    <img src="{{ item.photo.url }}" alt="{{ item.name }}" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
+                                                {% else %}
+                                                    <i class="fas fa-image fa-2x text-muted"></i>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ item.name }}</td>
+                                            <td>{{ item.description|default:"-" }}</td>
+                                            <td>₹{{ item.price }}</td>
+                                            <td>{{ item.quantity }}</td>
+                                            <td>
+                                                <span class="badge rounded-pill {% if item.is_available %}bg-success{% else %}bg-danger{% endif %} py-2 px-3">
+                                                    {{ item.is_available|yesno:"Available,Unavailable" }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-2">
+                                                    <button class="btn btn-sm btn-outline-primary rounded-circle action-btn edit-item-btn" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#editItemModal"
+                                                            data-item-id="{{ item.id }}"
+                                                            data-item-name="{{ item.name }}"
+                                                            data-item-description="{{ item.description|default:"" }}"
+                                                            data-item-price="{{ item.price }}"
+                                                            data-item-quantity="{{ item.quantity }}"
+                                                            data-item-section-id="{{ item.section.id|default:"" }}"
+                                                            data-item-photo-url="{% if item.photo %}{{ item.photo.url }}{% endif %}"
+                                                            data-item-is-available="{{ item.is_available }}"
+                                                            data-bs-toggle="tooltip" 
+                                                            data-bs-placement="top" 
+                                                            title="Edit Item">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger rounded-circle action-btn delete-item" 
+                                                            data-item-id="{{ item.id }}"
+                                                            data-bs-toggle="tooltip" 
+                                                            data-bs-placement="top" 
+                                                            title="Delete Item">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm {% if item.is_available %}btn-outline-warning{% else %}btn-outline-success{% endif %} rounded-circle action-btn toggle-availability" 
+                                                            data-item-id="{{ item.id }}"
+                                                            data-bs-toggle="tooltip" 
+                                                            data-bs-placement="top" 
+                                                            title="{% if item.is_available %}Make Unavailable{% else %}Make Available{% endif %}">
+                                                        <i class="fas {% if item.is_available %}fa-times{% else %}fa-check{% endif %}"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for item in unsectioned_items %}
-                                            <tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if unsectioned_items %}
+                <div class="section mb-4">
+                    <h3 class="h4 fw-bold mb-3" style="color: #2c3e50;">Unsectioned Items</h3>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Image</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Description</th>
+                                    <th scope="col">Price</th>
+                                    <th scope="col">Quantity</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in unsectioned_items %}
+                                    <tr>
                                         <td>
                                             {% if item.photo %}
                                                 <img src="{{ item.photo.url }}" alt="{{ item.name }}" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
@@ -158,67 +158,67 @@
                                                 <i class="fas fa-image fa-2x text-muted"></i>
                                             {% endif %}
                                         </td>
-                                                <td>{{ item.name }}</td>
-                                                <td>{{ item.description|default:"-" }}</td>
-                                                <td>₹{{ item.price }}</td>
-                                                <td>{{ item.quantity }}</td>
-                                                <td>
+                                        <td>{{ item.name }}</td>
+                                        <td>{{ item.description|default:"-" }}</td>
+                                        <td>₹{{ item.price }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>
                                             <span class="badge rounded-pill {% if item.is_available %}bg-success{% else %}bg-danger{% endif %} py-2 px-3">
-                                                        {{ item.is_available|yesno:"Available,Unavailable" }}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex gap-2">
-                                                        <button class="btn btn-sm btn-outline-primary rounded-circle action-btn edit-item-btn" 
-                                                                data-bs-toggle="modal" 
-                                                                data-bs-target="#editItemModal"
-                                                                data-item-id="{{ item.id }}"
-                                                                data-item-name="{{ item.name }}"
-                                                                data-item-description="{{ item.description|default:"" }}"
-                                                                data-item-price="{{ item.price }}"
-                                                                data-item-quantity="{{ item.quantity }}"
-                                                                data-item-section-id="{{ item.section.id|default:"" }}"
-                                                                data-item-photo-url="{% if item.photo %}{{ item.photo.url }}{% endif %}"
-                                                                data-item-is-available="{{ item.is_available }}"
-                                                                data-bs-toggle="tooltip" 
-                                                                data-bs-placement="top" 
-                                                                title="Edit Item">
-                                                                    <i class="fas fa-edit"></i>
-                                                        </button>
-                                                        <button class="btn btn-sm btn-outline-danger rounded-circle action-btn delete-item" 
-                                                                data-item-id="{{ item.id }}"
-                                                                data-bs-toggle="tooltip" 
-                                                                data-bs-placement="top" 
-                                                                title="Delete Item">
-                                                                    <i class="fas fa-trash"></i>
-                                                        </button>
-                                                        <button class="btn btn-sm {% if item.is_available %}btn-outline-warning{% else %}btn-outline-success{% endif %} rounded-circle action-btn toggle-availability" 
-                                                                data-item-id="{{ item.id }}"
-                                                                data-bs-toggle="tooltip" 
-                                                                data-bs-placement="top" 
-                                                                title="{% if item.is_available %}Make Unavailable{% else %}Make Available{% endif %}">
-                                                                    <i class="fas {% if item.is_available %}fa-times{% else %}fa-check{% endif %}"></i>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    {% endif %}
-
-                    {% if not sections and not unsectioned_items %}
-                <div class="text-center py-5">
-                    <div class="alert alert-info border-0 shadow-sm mb-4">
-                        <h4 class="alert-heading fw-bold mb-2">No Menu Items Yet!</h4>
-                        <p class="mb-0">You haven't added any menu items or sections yet. Start by adding one!</p>
+                                                {{ item.is_available|yesno:"Available,Unavailable" }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-sm btn-outline-primary rounded-circle action-btn edit-item-btn" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#editItemModal"
+                                                        data-item-id="{{ item.id }}"
+                                                        data-item-name="{{ item.name }}"
+                                                        data-item-description="{{ item.description|default:"" }}"
+                                                        data-item-price="{{ item.price }}"
+                                                        data-item-quantity="{{ item.quantity }}"
+                                                        data-item-section-id="{{ item.section.id|default:"" }}"
+                                                        data-item-photo-url="{% if item.photo %}{{ item.photo.url }}{% endif %}"
+                                                        data-item-is-available="{{ item.is_available }}"
+                                                        data-bs-toggle="tooltip" 
+                                                        data-bs-placement="top" 
+                                                        title="Edit Item">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger rounded-circle action-btn delete-item" 
+                                                        data-item-id="{{ item.id }}"
+                                                        data-bs-toggle="tooltip" 
+                                                        data-bs-placement="top" 
+                                                        title="Delete Item">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                                <button class="btn btn-sm {% if item.is_available %}btn-outline-warning{% else %}btn-outline-success{% endif %} rounded-circle action-btn toggle-availability" 
+                                                        data-item-id="{{ item.id }}"
+                                                        data-bs-toggle="tooltip" 
+                                                        data-bs-placement="top" 
+                                                        title="{% if item.is_available %}Make Unavailable{% else %}Make Available{% endif %}">
+                                                    <i class="fas {% if item.is_available %}fa-times{% else %}fa-check{% endif %}"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-                    <button class="btn btn-primary rounded-pill px-4 py-2" data-bs-toggle="modal" data-bs-target="#addItemModal">
-                        <i class="fas fa-plus-circle me-2"></i>Add Your First Item
-                    </button>
                 </div>
+            {% endif %}
+
+            {% if not sections and not unsectioned_items %}
+            <div class="text-center py-5">
+                <div class="alert alert-info border-0 shadow-sm mb-4">
+                    <h4 class="alert-heading fw-bold mb-2">No Menu Items Yet!</h4>
+                    <p class="mb-0">You haven't added any menu items or sections yet. Start by adding one!</p>
+                </div>
+                <button class="btn btn-primary rounded-pill px-4 py-2" data-bs-toggle="modal" data-bs-target="#addItemModal">
+                    <i class="fas fa-plus-circle me-2"></i>Add Your First Item
+                </button>
+            </div>
             {% endif %}
         </div>
     </div>

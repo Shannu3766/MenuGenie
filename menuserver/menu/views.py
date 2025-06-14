@@ -3,12 +3,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import IntegrityError
 from django.http import JsonResponse
-from .models import MenuLink, MenuItem, MenuSection
+from .models import MenuLink, MenuItem, MenuSection, Restaurant
 from .forms import MenuItemForm, MenuSectionForm, MenuUploadForm
 from .utils import extract_menu_data
 import os
 from django.conf import settings
 import json
+from django.core.files.storage import FileSystemStorage
+from django.utils.text import slugify
 
 # Create your views here.
 
@@ -25,23 +27,62 @@ def my_restaurants(request):
 @login_required
 def create_restaurant(request):
     if request.method == 'POST':
-        restaurant_name = request.POST.get('restaurant_name')
-        restaurant_image = request.FILES.get('restaurant_image')
-        
-        if restaurant_name:
+        if 'template' in request.POST:
+            # Second step: Create restaurant with template
+            restaurant_name = request.POST.get('restaurant_name')
+            restaurant_image = request.FILES.get('restaurant_image')
+            template = request.POST.get('template')
+            
             try:
+                # Check if restaurant with same name exists for this user
+                existing = Restaurant.objects.filter(user=request.user, name=restaurant_name).first()
+                if existing:
+                    messages.error(request, f'A restaurant named "{restaurant_name}" already exists.')
+                    return redirect('menu:create_restaurant')
+                
+                # Create restaurant
+                restaurant = Restaurant.objects.create(
+                    user=request.user,
+                    name=restaurant_name,
+                    image=restaurant_image
+                )
+                
+                # Create menu link
                 menu_link = MenuLink.objects.create(
                     user=request.user,
-                    restaurant_name=restaurant_name,
-                    restaurant_image=restaurant_image
+                    restaurant=restaurant,
+                    template=template
                 )
+                
                 messages.success(request, 'Restaurant created successfully!')
                 return redirect('menu:my_restaurants')
             except IntegrityError:
-                messages.error(request, f'A restaurant named "{restaurant_name}" already exists. Please choose a different name.')
+                messages.error(request, f'A restaurant named "{restaurant_name}" already exists.')
                 return render(request, 'menu/create_restaurant.html', {
                     'restaurant_name': restaurant_name
                 })
+        else:
+            # First step: Save basic info and redirect to template selection
+            restaurant_name = request.POST.get('restaurant_name')
+            restaurant_image = request.FILES.get('restaurant_image')
+            
+            if not restaurant_name or not restaurant_image:
+                messages.error(request, 'Please provide both restaurant name and image.')
+                return redirect('menu:create_restaurant')
+            
+            # Store the data in session for the next step
+            request.session['restaurant_name'] = restaurant_name
+            request.session['restaurant_image'] = restaurant_image.name
+            
+            # Save the image temporarily
+            fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'temp'))
+            filename = fs.save(restaurant_image.name, restaurant_image)
+            
+            return render(request, 'menu/select_template.html', {
+                'restaurant_name': restaurant_name,
+                'restaurant_image': filename
+            })
+    
     return render(request, 'menu/create_restaurant.html')
 
 @login_required
@@ -50,9 +91,16 @@ def import_restaurant(request):
         restaurant_name = request.POST.get('restaurant_name')
         if restaurant_name:
             try:
+                # Create restaurant first
+                restaurant = Restaurant.objects.create(
+                    user=request.user,
+                    name=restaurant_name
+                )
+                
+                # Create menu link
                 MenuLink.objects.create(
                     user=request.user,
-                    restaurant_name=restaurant_name
+                    restaurant=restaurant
                 )
                 messages.success(request, 'Restaurant imported successfully!')
                 return redirect('menu:my_restaurants')
@@ -267,35 +315,34 @@ def edit_menu_item(request, menu_id, item_id):
     })
 
 def public_menu(request, user_id, restaurant_name):
-    menu_link = get_object_or_404(MenuLink, user_id=user_id, restaurant_name=restaurant_name)
+    """Public view of a restaurant's menu"""
+    # Convert the restaurant name from slug to title case for comparison
+    restaurant_name_title = restaurant_name.replace('-', ' ').title()
     
-    # Get all sections with their items
-    sections = []
-    for section in MenuSection.objects.filter(menu=menu_link).order_by('name'):
-        items = MenuItem.objects.filter(
-            menu=menu_link,
-            section=section,
-            is_available=True
-        ).order_by('name')
-        if items.exists():
-            sections.append({
-                'name': section.name,
-                'items': items
-            })
+    # Try to find the restaurant with case-insensitive name comparison
+    menu_link = get_object_or_404(
+        MenuLink,
+        user_id=user_id,
+        restaurant__name__iexact=restaurant_name_title
+    )
     
-    # Get unsectioned items
-    unsectioned_items = MenuItem.objects.filter(
-        menu=menu_link,
-        section__isnull=True,
-        is_available=True
-    ).order_by('name')
+    # Get all sections ordered by name
+    sections = menu_link.sections.all().order_by('name')
+    
+    # Get all items that belong to sections
+    sectioned_items = menu_link.items.filter(section__isnull=False).order_by('section__name', 'name')
+    
+    # Get all items that don't belong to any section
+    unsectioned_items = menu_link.items.filter(section__isnull=True).order_by('name')
     
     context = {
         'menu_link': menu_link,
         'sections': sections,
+        'sectioned_items': sectioned_items,
         'unsectioned_items': unsectioned_items,
     }
-    return render(request, 'menu/public_menu.html', context)
+    
+    return render(request, f'menu/templates/public_menu_{menu_link.template}.html', context)
 
 @login_required
 def delete_section(request, menu_id, section_id):
@@ -335,21 +382,21 @@ def toggle_section_availability(request, menu_id, section_id):
 
 @login_required
 def delete_restaurant(request, menu_id):
+    menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+    
     if request.method == 'POST':
-        menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
-        
         # Delete the restaurant image if it exists
-        if menu_link.restaurant_image:
-            # Delete the image file
-            if os.path.isfile(menu_link.restaurant_image.path):
-                os.remove(menu_link.restaurant_image.path)
+        if menu_link.restaurant and menu_link.restaurant.image:
+            # Delete the image file from storage
+            if os.path.isfile(menu_link.restaurant.image.path):
+                os.remove(menu_link.restaurant.image.path)
         
-        # Delete the restaurant
+        # Delete the menu link and related objects
         menu_link.delete()
-        messages.success(request, 'Restaurant deleted successfully!')
+        messages.success(request, 'Restaurant deleted successfully.')
         return redirect('menu:my_restaurants')
     
-    return redirect('menu:my_restaurants')
+    return render(request, 'menu/delete_restaurant.html', {'menu_link': menu_link})
 
 @login_required
 def edit_restaurant(request, menu_id):
@@ -362,17 +409,17 @@ def edit_restaurant(request, menu_id):
         if restaurant_name:
             try:
                 # Update restaurant name
-                menu_link.restaurant_name = restaurant_name
+                menu_link.restaurant.name = restaurant_name
                 
                 # Update restaurant image if provided
                 if restaurant_image:
                     # Delete old image if it exists
-                    if menu_link.restaurant_image:
-                        if os.path.isfile(menu_link.restaurant_image.path):
-                            os.remove(menu_link.restaurant_image.path)
-                    menu_link.restaurant_image = restaurant_image
+                    if menu_link.restaurant.image:
+                        if os.path.isfile(menu_link.restaurant.image.path):
+                            os.remove(menu_link.restaurant.image.path)
+                    menu_link.restaurant.image = restaurant_image
                 
-                menu_link.save()
+                menu_link.restaurant.save()
                 messages.success(request, 'Restaurant updated successfully!')
                 return redirect('menu:my_restaurants')
             except IntegrityError:
@@ -385,3 +432,18 @@ def edit_restaurant(request, menu_id):
     return render(request, 'menu/edit_restaurant.html', {
         'menu_link': menu_link
     })
+
+@login_required
+def change_template(request, menu_id):
+    menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+    
+    if request.method == 'POST':
+        template = request.POST.get('template')
+        if template in dict(MenuLink.TEMPLATE_CHOICES):
+            menu_link.template = template
+            menu_link.save()
+            messages.success(request, 'Menu template updated successfully!')
+        else:
+            messages.error(request, 'Invalid template selected.')
+    
+    return redirect('menu:my_restaurants')

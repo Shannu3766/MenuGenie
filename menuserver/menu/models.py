@@ -7,22 +7,34 @@ from django.utils.text import slugify
 
 # Create your models here.
 
-class MenuLink(models.Model):
+class Restaurant(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100, null=True, blank=True)
-    restaurant_name = models.CharField(max_length=100)
-    restaurant_image = models.ImageField(upload_to='restaurant_images/', null=True, blank=True)
+    name = models.CharField(max_length=100)
+    image = models.ImageField(upload_to='restaurants/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['user', 'name']
+
+    def __str__(self):
+        return self.name
+
+class MenuLink(models.Model):
+    TEMPLATE_CHOICES = [
+        ('classic', 'Classic'),
+        ('modern', 'Modern'),
+        ('minimal', 'Minimal'),
+    ]
+    
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, null=True)
+    template = models.CharField(max_length=20, choices=TEMPLATE_CHOICES, default='classic')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.restaurant_name} - {self.name}"
-
-    def save(self, *args, **kwargs):
-        # Ensure the restaurant image path includes the restaurant name for better organization
-        if self.restaurant_image and not self.restaurant_image.name.startswith(f'restaurant_images/{self.restaurant_name}/'):
-            self.restaurant_image.name = f'restaurant_images/{self.restaurant_name}/{self.restaurant_image.name}'
-        super().save(*args, **kwargs)
+        return f"{self.restaurant.name}'s Menu" if self.restaurant else "Menu"
 
 class MenuSection(models.Model):
     menu = models.ForeignKey(MenuLink, on_delete=models.CASCADE, related_name='sections')
@@ -35,7 +47,7 @@ class MenuSection(models.Model):
         unique_together = ['menu', 'name']
 
     def __str__(self):
-        return f"{self.menu.restaurant_name} - {self.name}"
+        return f"{self.menu.restaurant.name} - {self.name}" if self.menu.restaurant else self.name
 
 class MenuItem(models.Model):
     menu = models.ForeignKey(MenuLink, on_delete=models.CASCADE, related_name='items')
@@ -53,10 +65,9 @@ class MenuItem(models.Model):
         ordering = ['section__name', 'name']
 
     def __str__(self):
-        return f"{self.menu.restaurant_name} - {self.name}"
+        return f"{self.menu.restaurant.name} - {self.name}" if self.menu.restaurant else self.name
 
     def save(self, *args, **kwargs):
-        # Ensure the photo path includes the restaurant name for better organization
-        if self.photo and not self.photo.name.startswith(f'menu_items/{self.menu.restaurant_name}/'):
-            self.photo.name = f'menu_items/{self.menu.restaurant_name}/{self.photo.name}'
+        if self.photo and self.menu.restaurant and not self.photo.name.startswith(f'menu_items/{self.menu.restaurant.name}/'):
+            self.photo.name = f'menu_items/{self.menu.restaurant.name}/{self.photo.name}'
         super().save(*args, **kwargs)

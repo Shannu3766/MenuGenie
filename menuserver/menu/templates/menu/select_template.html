@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Select Menu Template{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4 fw-bold" style="color: #1e293b;">Step 2: Select Menu Template</h2>
+                    
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" action="{% url 'menu:create_restaurant' %}" class="needs-validation" novalidate enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="restaurant_name" value="{{ restaurant_name }}">
+                        <input type="hidden" name="restaurant_image" value="{{ restaurant_image }}">
+                        
+                        <div class="row g-4">
+                            <!-- Classic Template -->
+                            <div class="col-md-4">
+                                <div class="template-card" data-template="classic">
+                                    <div class="card h-100 border-2">
+                                        <img src="{% static 'menu/images/classic-template.jpg' %}" class="card-img-top" alt="Classic Template">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">Classic</h5>
+                                            <p class="card-text small text-muted">Traditional menu layout with elegant typography</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Modern Template -->
+                            <div class="col-md-4">
+                                <div class="template-card" data-template="modern">
+                                    <div class="card h-100 border-2">
+                                        <img src="{% static 'menu/images/modern-template.jpg' %}" class="card-img-top" alt="Modern Template">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">Modern</h5>
+                                            <p class="card-text small text-muted">Contemporary design with bold visuals</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Minimal Template -->
+                            <div class="col-md-4">
+                                <div class="template-card" data-template="minimal">
+                                    <div class="card h-100 border-2">
+                                        <img src="{% static 'menu/images/minimal-template.jpg' %}" class="card-img-top" alt="Minimal Template">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">Minimal</h5>
+                                            <p class="card-text small text-muted">Clean and simple design focusing on content</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <input type="hidden" name="template" id="selected_template" value="classic">
+                        
+                        <div class="d-grid gap-3 mt-5">
+                            <button type="submit" class="btn btn-primary rounded-pill py-2">
+                                <i class="fas fa-check me-2"></i>Create Restaurant
+                            </button>
+                            <a href="{% url 'menu:create_restaurant' %}" class="btn btn-outline-secondary rounded-pill py-2">
+                                <i class="fas fa-arrow-left me-2"></i>Back
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .template-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .template-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .template-card.selected .card {
+        border-color: #0ea5e9 !important;
+        box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.25);
+    }
+    
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    
+    .card-img-top {
+        height: 200px;
+        object-fit: cover;
+    }
+    
+    .btn-primary {
+        background-color: #0ea5e9;
+        border-color: #0ea5e9;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0284c7;
+        border-color: #0284c7;
+    }
+    
+    .btn-outline-secondary {
+        color: #64748b;
+        border-color: #e2e8f0;
+    }
+    
+    .btn-outline-secondary:hover {
+        background-color: #f1f5f9;
+        border-color: #e2e8f0;
+        color: #475569;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const templateCards = document.querySelectorAll('.template-card');
+    const selectedTemplateInput = document.getElementById('selected_template');
+    
+    templateCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Remove selected class from all cards
+            templateCards.forEach(c => c.classList.remove('selected'));
+            
+            // Add selected class to clicked card
+            this.classList.add('selected');
+            
+            // Update hidden input value
+            selectedTemplateInput.value = this.dataset.template;
+        });
+    });
+    
+    // Select classic template by default
+    document.querySelector('[data-template="classic"]').classList.add('selected');
+});
+</script>
+{% endblock %} 

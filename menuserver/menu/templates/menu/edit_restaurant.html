@@ -25,9 +25,9 @@
                         <div class="mb-4">
                             <label class="form-label fw-medium">Restaurant Image</label>
                             <div class="image-upload-container text-center p-4 border rounded-3 mb-2" style="background-color: #f8fafc;">
-                                {% if menu_link.restaurant_image %}
+                                {% if menu_link.restaurant.image %}
                                     <div id="imagePreview" class="mb-3">
-                                        <img id="preview" src="{{ menu_link.restaurant_image.url }}" alt="Preview" class="img-fluid rounded-3" style="max-height: 200px;">
+                                        <img id="preview" src="{{ menu_link.restaurant.image.url }}" alt="Preview" class="img-fluid rounded-3" style="max-height: 200px;">
                                     </div>
                                 {% else %}
                                     <div id="imagePreview" class="mb-3" style="display: none;">
@@ -54,7 +54,7 @@
                             <label for="restaurant_name" class="form-label fw-medium">Restaurant Name</label>
                             <input type="text" class="form-control" id="restaurant_name" name="restaurant_name" 
                                    required placeholder="e.g. The Food Place" 
-                                   value="{{ menu_link.restaurant_name }}">
+                                   value="{{ menu_link.restaurant.name }}">
                             <div class="form-text">
                                 Enter the name of your restaurant
                             </div>
@@ -172,15 +172,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Image preview
-    imageInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
+    imageInput.addEventListener('change', function() {
+        const file = this.files[0];
         if (file) {
-            if (file.size > 5 * 1024 * 1024) { // 5MB limit
-                alert('File size should not exceed 5MB');
-                imageInput.value = '';
-                return;
-            }
-            
             const reader = new FileReader();
             reader.onload = function(e) {
                 preview.src = e.target.result;
