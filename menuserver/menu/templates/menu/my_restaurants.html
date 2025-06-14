@@ -3,106 +3,158 @@
 {% block title %}My Restaurants{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-12">
-            <h1 class="mb-4">My Restaurants</h1>
-            
-            {% if menu_links %}
-                <div class="row">
-                    {% for link in menu_links %}
-                        <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="card h-100">
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ link.restaurant_name|default:link.user.username }}'s Restaurant</h5>
-                                    <p class="card-text text-muted">
-                                        <small>Public Menu URL:</small>
-                                    </p>
-                                    <div class="input-group mb-3">
-                                        <input type="text" class="form-control" value="{{ request.scheme }}://{{ request.get_host }}/{{ link.user.id }}/{{ link.restaurant_name|slugify }}/" readonly>
-                                        <button class="btn btn-outline-secondary" type="button" onclick="copyMenuLink(this)">
-                                            <i class="fas fa-copy"></i>
-                                        </button>
-                                    </div>
-                                    <div class="d-grid gap-2">
-                                        <a href="/{{ link.user.id }}/{{ link.restaurant_name|slugify }}/" target="_blank" class="btn btn-primary">
-                                            <i class="fas fa-external-link-alt me-2"></i>Visit Menu
-                                        </a>
-                                        <a href="{% url 'menu:manage_menu' link.id %}" class="btn btn-success">
-                                            <i class="fas fa-utensils me-2"></i>Manage Menu
-                                        </a>
-                                    </div>
-                                </div>
-                                <div class="card-footer text-muted">
-                                    <small>Added: {{ link.created_at|date:"F j, Y" }}</small>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="text-center py-5">
-                    <div class="alert alert-info mb-4">
-                        <h4 class="alert-heading">No Restaurants Yet!</h4>
-                        <p>You haven't added any restaurants yet. Would you like to create one?</p>
-                    </div>
-                    
-                    <div class="row justify-content-center">
-                        <div class="col-md-8">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title mb-4">Choose How to Create Your Restaurant</h5>
-                                    <div class="d-grid gap-3">
-                                        <a href="{% url 'menu:create_restaurant' %}" class="btn btn-primary btn-lg">
-                                            <i class="fas fa-plus-circle me-2"></i>Create New Restaurant
-                                        </a>
-                                        <a href="{% url 'menu:import_restaurant' %}" class="btn btn-outline-primary btn-lg">
-                                            <i class="fas fa-file-import me-2"></i>Import Existing Restaurant
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            {% endif %}
+<div class="container py-5">
+    <div class="row align-items-center mb-4">
+        <div class="col">
+            <h1 class="h2 fw-bold mb-0" style="color: #2c3e50;">My Restaurants</h1>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'menu:create_restaurant' %}" class="btn btn-primary rounded-pill px-4 py-2">
+                <i class="fas fa-plus-circle me-2"></i>Add New Restaurant
+            </a>
         </div>
     </div>
+    
+    {% if menu_links %}
+        <div class="row">
+            {% for link in menu_links %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h5 class="card-title fw-bold mb-3">{{ link.restaurant_name|default:link.user.username }}'s Restaurant</h5>
+                            <p class="card-text text-muted mb-3">
+                                <small>Public Menu URL:</small>
+                            </p>
+                            <div class="input-group mb-4">
+                                <input type="text" class="form-control border-end-0" value="{{ request.scheme }}://{{ request.get_host }}/{{ link.user.id }}/{{ link.restaurant_name|slugify }}/" readonly>
+                                <button class="btn btn-outline-secondary border-start-0" type="button" onclick="copyMenuLink(this)">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a href="/{{ link.user.id }}/{{ link.restaurant_name|slugify }}/" target="_blank" class="btn btn-primary rounded-pill">
+                                    <i class="fas fa-external-link-alt me-2"></i>Visit Menu
+                                </a>
+                                <a href="{% url 'menu:manage_menu' link.id %}" class="btn btn-success rounded-pill">
+                                    <i class="fas fa-utensils me-2"></i>Manage Menu
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 text-muted px-4 pb-4">
+                            <small>Added: {{ link.created_at|date:"F j, Y" }}</small>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <div class="alert alert-info border-0 shadow-sm mb-4">
+                <h4 class="alert-heading fw-bold mb-2">No Restaurants Yet!</h4>
+                <p class="mb-0">You haven't added any restaurants yet. Would you like to create one?</p>
+            </div>
+            
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h5 class="card-title fw-bold mb-4">Choose How to Create Your Restaurant</h5>
+                            <div class="d-grid gap-3">
+                                <a href="{% url 'menu:create_restaurant' %}" class="btn btn-primary rounded-pill py-3">
+                                    <i class="fas fa-plus-circle me-2"></i>Create New Restaurant
+                                </a>
+                                <a href="{% url 'menu:import_restaurant' %}" class="btn btn-outline-primary rounded-pill py-3">
+                                    <i class="fas fa-file-import me-2"></i>Import Existing Restaurant
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 </div>
 
 <!-- Add Font Awesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 <style>
-    .btn-lg {
-        padding: 1rem 2rem;
-        font-size: 1.1rem;
+    body {
+        background-color: #f8f9fa;
     }
+    
     .card {
-        border: none;
-        box-shadow: 0 0 15px rgba(0,0,0,0.1);
-        transition: transform 0.2s ease-in-out;
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        border-radius: 15px;
     }
+    
     .card:hover {
         transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
     }
-    .alert {
-        border: none;
-        box-shadow: 0 0 10px rgba(0,0,0,0.05);
-    }
+    
     .btn {
         transition: all 0.2s ease-in-out;
+        font-weight: 500;
     }
+    
     .btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
+    
+    .btn-primary {
+        background-color: #0ea5e9;
+        border-color: #0ea5e9;
+    }
+    
+    .btn-primary:hover {
+        background-color: #0284c7;
+        border-color: #0284c7;
+    }
+    
+    .btn-success {
+        background-color: #10b981;
+        border-color: #10b981;
+    }
+    
+    .btn-success:hover {
+        background-color: #059669;
+        border-color: #059669;
+    }
+    
+    .btn-outline-primary {
+        color: #0ea5e9;
+        border-color: #0ea5e9;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: #0ea5e9;
+        border-color: #0ea5e9;
+    }
+    
+    .form-control {
+        border-radius: 8px;
+        border-color: #e2e8f0;
+    }
+    
+    .form-control:focus {
+        border-color: #0ea5e9;
+        box-shadow: 0 0 0 0.2rem rgba(14, 165, 233, 0.25);
+    }
+    
+    .alert-info {
+        background-color: #f0f9ff;
+        color: #0369a1;
+        border-radius: 12px;
+    }
+    
     .card-title {
-        color: #2c3e50;
-        font-weight: 600;
+        color: #1e293b;
     }
+    
     .text-muted {
-        color: #6c757d !important;
+        color: #64748b !important;
     }
 </style>
 

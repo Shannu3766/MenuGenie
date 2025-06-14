@@ -3,99 +3,190 @@
 {% block title %}Additional Information{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <div class="text-center mb-4">
-                        <h2 class="h4">Additional Information</h2>
-                        <p class="text-muted">Step 4 of 4</p>
-                    </div>
-                    
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
+<div class="container py-5 d-flex justify-content-center align-items-center" style="min-height: calc(100vh - 120px);">
+    <div class="card p-0 shadow-lg border-0" style="max-width: 900px; width: 100%; border-radius: 20px;">
+        <div class="row g-0">
+            <!-- Left Section: Illustration -->
+            <div class="col-md-6 d-none d-md-flex align-items-center justify-content-center p-4" style="background: linear-gradient(135deg, #f0f8ff, #e0f2f7); border-top-left-radius: 20px; border-bottom-left-radius: 20px;">
+                <img src="https://i.ibb.co/k0Tf5bK/ghostlamp-illustration.png" alt="Registration Illustration" class="img-fluid p-4" style="max-height: 400px; object-fit: contain;">
+            </div>
 
-                    <form method="post" class="needs-validation" novalidate>
-                        {% csrf_token %}
-                        <input type="hidden" name="email" value="{{ email }}">
-                        <input type="hidden" name="username" value="{{ username }}">
-                        <input type="hidden" name="password1" value="{{ password1 }}">
-                        <input type="hidden" name="password2" value="{{ password2 }}">
-                        
-                        <div class="mb-3">
-                            <label for="phone_number" class="form-label">Phone Number</label>
-                            <input type="tel" class="form-control" id="phone_number" name="phone_number" 
-                                   pattern="[0-9]{10}" placeholder="Enter 10-digit phone number">
-                            <div class="form-text">
-                                Enter your 10-digit phone number
-                            </div>
-                            <div class="invalid-feedback">
-                                Please enter a valid 10-digit phone number.
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="address" class="form-label">Address</label>
-                            <textarea class="form-control" id="address" name="address" rows="3" 
-                                      placeholder="Enter your address"></textarea>
-                            <div class="form-text">
-                                Enter your complete address
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="is_restaurant_owner" 
-                                       name="is_restaurant_owner">
-                                <label class="form-check-label" for="is_restaurant_owner">
-                                    I am a restaurant owner
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-between">
-                            <a href="{% url 'accounts:register_step3' %}" class="btn btn-outline-secondary">Back</a>
-                            <button type="submit" class="btn btn-primary">Complete Registration</button>
-                        </div>
-                    </form>
+            <!-- Right Section: Registration Form -->
+            <div class="col-md-6 p-5">
+                <div class="text-center mb-4">
+                    <h2 class="h4 fw-bold mb-2" style="color: #333;">Additional Information</h2>
+                    <p class="text-muted small" style="color: #666;">Step 4 of 4</p>
                 </div>
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" name="email" value="{{ email }}">
+                    <input type="hidden" name="username" value="{{ username }}">
+                    <input type="hidden" name="password1" value="{{ password1 }}">
+                    <input type="hidden" name="password2" value="{{ password2 }}">
+                    
+                    <div class="form-group mb-4">
+                        <label for="id_phone_number" class="form-label">Phone Number</label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                            <input type="tel" class="form-control" id="id_phone_number" name="phone_number" 
+                                   pattern="[0-9]{10}" placeholder="Enter 10-digit phone number">
+                        </div>
+                        <div class="form-text text-muted small mt-1">
+                            Enter your 10-digit phone number
+                        </div>
+                        <div class="invalid-feedback">
+                            Please enter a valid 10-digit phone number.
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="id_address" class="form-label">Address</label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                            <textarea class="form-control" id="id_address" name="address" rows="3" 
+                                      placeholder="Enter your address"></textarea>
+                        </div>
+                        <div class="form-text text-muted small mt-1">
+                            Enter your complete address
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="id_is_restaurant_owner" 
+                                   name="is_restaurant_owner">
+                            <label class="form-check-label" for="id_is_restaurant_owner">
+                                I am a restaurant owner
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-center gap-4 mt-5">
+                        <a href="{% url 'accounts:register_step3' %}" class="btn btn-light rounded-pill fw-bold px-4 py-2">Back</a>
+                        <button type="submit" class="btn btn-primary rounded-pill fw-bold px-4 py-2">Complete Registration</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
 <style>
+    body {
+        background-color: #f0f2f7;
+    }
+
     .card {
+        background-color: #fff;
+        border-radius: 20px;
+        border: none;
+    }
+
+    .form-label {
+        color: #333;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control {
+        border: 1px solid #e0e0e0;
         border-radius: 8px;
-        border: 1px solid #dadce0;
+        padding: 0.75rem 1rem;
+        height: auto;
+        background-color: #fcfcfc;
     }
+
+    .form-control:focus {
+        border-color: #0ea5e9;
+        box-shadow: 0 0 0 0.2rem rgba(14, 165, 233, 0.25);
+    }
+
+    .input-group-text {
+        background-color: #fff;
+        border: 1px solid #e0e0e0;
+        border-right: none;
+        color: #9e9e9e;
+        padding: 0.75rem 1rem;
+    }
+
+    .input-group .form-control {
+        border-left: none;
+    }
+
+    .input-group .form-control:focus {
+        border-left: none;
+    }
+
+    textarea.form-control {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .form-check-input {
+        border-color: #ccc;
+        margin-top: 0.2rem;
+    }
+
+    .form-check-input:checked {
+        background-color: #0ea5e9;
+        border-color: #0ea5e9;
+    }
+
+    .form-check-label {
+        color: #666;
+        margin-left: 0.5rem;
+    }
+
     .btn-primary {
-        background-color: #1a73e8;
-        border-color: #1a73e8;
+        background-color: #0ea5e9;
+        border-color: #0ea5e9;
+        font-size: 0.95rem;
+        min-width: 180px;
     }
+
     .btn-primary:hover {
-        background-color: #1557b0;
-        border-color: #1557b0;
+        background-color: #0284c7;
+        border-color: #0284c7;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .btn-light {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        color: #666;
+        font-size: 0.95rem;
+        min-width: 120px;
+    }
+
+    .btn-light:hover {
+        background-color: #f8f8f8;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .fw-bold {
+        font-weight: 600 !important;
     }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('form');
-    const phoneInput = document.getElementById('phone_number');
+    const phoneInput = document.getElementById('id_phone_number');
 
     phoneInput.addEventListener('input', function(e) {
-        // Remove any non-digit characters
         this.value = this.value.replace(/\D/g, '');
-        
-        // Limit to 10 digits
         if (this.value.length > 10) {
             this.value = this.value.slice(0, 10);
         }
