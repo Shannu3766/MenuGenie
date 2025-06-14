@@ -4,12 +4,16 @@
 
 {% block content %}
 <div class="restaurant-header position-relative">
-    {% if menu_link.restaurant_image %}
-        <div class="restaurant-image-wrapper">
+    <div class="restaurant-image-wrapper">
+        {% if menu_link.restaurant_image.url %}
             <img src="{{ menu_link.restaurant_image.url }}" alt="{{ menu_link.restaurant_name }}" class="restaurant-image">
-            <div class="overlay"></div>
-        </div>
-    {% endif %}
+        {% else %}
+            <div class="bg-light d-flex align-items-center justify-content-center restaurant-image" style="height: 100%; width: 100%;">
+                <i class="fas fa-utensils fa-5x text-muted"></i>
+            </div>
+        {% endif %}
+        <div class="overlay"></div>
+    </div>
     <div class="restaurant-info text-center">
         <h1 class="restaurant-name">{{ menu_link.restaurant_name }}</h1>
     </div>
@@ -24,10 +28,16 @@
                     {% for item in section.items %}
                         <div class="col-md-6 mb-4">
                             <div class="menu-item card border-0 shadow-sm h-100">
-                                {% if item.photo %}
-                                    <img src="{{ item.photo.url }}" class="card-img-top" alt="{{ item.name }}" style="height: 200px; object-fit: cover;">
-                                {% endif %}
-                                <div class="card-body">
+                                <div class="menu-item-image-wrapper">
+                                    {% if item.photo %}
+                                        <img src="{{ item.photo.url }}" class="card-img-top" alt="{{ item.name }}">
+                                    {% else %}
+                                        <div class="menu-item-placeholder d-flex align-items-center justify-content-center">
+                                            <i class="fas fa-utensils fa-3x text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                               <div class="card-body">
                                     <h5 class="card-title">{{ item.name }}</h5>
                                     <p class="card-text text-muted">{{ item.description }}</p>
                                     <div class="d-flex justify-content-between align-items-center">
@@ -52,9 +62,15 @@
                 {% for item in unsectioned_items %}
                     <div class="col-md-6 mb-4">
                         <div class="menu-item card border-0 shadow-sm h-100">
-                            {% if item.photo %}
-                                <img src="{{ item.photo.url }}" class="card-img-top" alt="{{ item.name }}" style="height: 200px; object-fit: cover;">
-                            {% endif %}
+                            <div class="menu-item-image-wrapper">
+                                {% if item.photo %}
+                                    <img src="{{ item.photo.url }}" class="card-img-top" alt="{{ item.name }}">
+                                {% else %}
+                                    <div class="menu-item-placeholder d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-utensils fa-3x text-muted"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
                             <div class="card-body">
                                 <h5 class="card-title">{{ item.name }}</h5>
                                 <p class="card-text text-muted">{{ item.description }}</p>
@@ -170,6 +186,24 @@
         .restaurant-name {
             font-size: 2rem;
         }
+    }
+
+    .menu-item-image-wrapper {
+        height: 200px; /* Fixed height for image or placeholder */
+        overflow: hidden;
+        background-color: #f8f9fa;
+    }
+
+    .menu-item-image-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .menu-item-placeholder {
+        width: 100%;
+        height: 100%;
+        background-color: #e9ecef; /* Light gray background for placeholder */
     }
 </style>
 {% endblock %} 
