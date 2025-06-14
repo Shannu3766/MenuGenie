@@ -16,20 +16,20 @@
                 <div class="text-center mb-5">
                     <h2 class="h4 fw-bold mb-2" style="color: #333;">Choose a username</h2>
                     <p class="text-muted small" style="color: #666;">Step 2 of 3</p>
-                </div>
-                
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
+                    </div>
+                    
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
 
-                <form method="post" class="needs-validation" novalidate>
-                    {% csrf_token %}
-                    <input type="hidden" name="email" value="{{ email }}">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="email" value="{{ email }}">
                     <div class="mb-3 position-relative">
                         <label for="id_username" class="form-label visually-hidden">Username</label>
                         <div class="input-group has-validation input-group-modern">
@@ -48,8 +48,8 @@
                     <div class="d-flex justify-content-between mt-4">
                         <a href="{% url 'accounts:register_step1' %}" class="btn btn-light btn-lg rounded-pill fw-bold" style="color: #666; border: 1px solid #ddd;">Back</a>
                         <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold text-white shadow-sm" style="background-color: #0ea5e9; border-color: #0ea5e9;">Next</button>
-                    </div>
-                </form>
+                        </div>
+                    </form>
             </div>
         </div>
     </div>

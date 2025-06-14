@@ -8,57 +8,57 @@
         <div class="col">
             <h1 class="h2 fw-bold mb-0" style="color: #2c3e50;">{{ menu_link.restaurant_name }} - Menu Management</h1>
             <div class="d-flex align-items-center mt-3">
-                <div class="input-group" style="max-width: 500px;">
+                        <div class="input-group" style="max-width: 500px;">
                     <input type="text" class="form-control" value="{{ request.scheme }}://{{ request.get_host }}{% url 'menu:public_menu' menu_link.user.id menu_link.restaurant_name|slugify %}" id="menuUrl" readonly>
                     <button class="btn btn-outline-secondary border-start-0" type="button" onclick="copyMenuUrl(this)">
                         <i class="fas fa-copy"></i>
-                    </button>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
         <div class="col-auto">
             <a href="{% url 'menu:my_restaurants' %}" class="btn btn-outline-primary rounded-pill px-4 py-2">
                 <i class="fas fa-arrow-left me-2"></i>Back to Restaurants
-            </a>
+                </a>
         </div>
-    </div>
+            </div>
 
-    <!-- Action Navbar -->
+            <!-- Action Navbar -->
     <div class="card border-0 shadow-sm mb-4 rounded-3">
         <div class="card-body d-flex justify-content-between align-items-center">
             <h5 class="card-title fw-bold mb-0" style="color: #1e293b;">Menu Actions</h5>
-            <div class="d-flex">
-                <button class="btn btn-primary rounded-pill px-4 me-2" data-bs-toggle="modal" data-bs-target="#addItemModal">
-                    <i class="fas fa-plus-circle me-2"></i>Add New Item
-                </button>
-                <button class="btn btn-success rounded-pill px-4 me-2" data-bs-toggle="modal" data-bs-target="#addSectionModal">
-                    <i class="fas fa-folder-plus me-2"></i>Add New Section
-                </button>
-                <button class="btn btn-info text-white rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#uploadMenuModal">
-                    <i class="fas fa-upload me-2"></i>Upload Menu
-                </button>
-            </div>
-        </div>
+            <div class="d-flex gap-3">
+                <button class="btn btn-outline-primary rounded-circle action-btn" data-bs-toggle="modal" data-bs-target="#addItemModal" data-bs-toggle="tooltip" data-bs-placement="top" title="Add New Item">
+                    <i class="fas fa-plus-circle"></i>
+                        </button>
+                <button class="btn btn-outline-success rounded-circle action-btn" data-bs-toggle="modal" data-bs-target="#addSectionModal" data-bs-toggle="tooltip" data-bs-placement="top" title="Add New Section">
+                    <i class="fas fa-folder-plus"></i>
+                        </button>
+                <button class="btn btn-outline-info rounded-circle action-btn" data-bs-toggle="modal" data-bs-target="#uploadMenuModal" data-bs-toggle="tooltip" data-bs-placement="top" title="Upload Menu">
+                    <i class="fas fa-upload"></i>
+                        </button>
+                    </div>
+                </div>
     </div>
 
-    <!-- Menu Items -->
+            <!-- Menu Items -->
     <div class="card border-0 shadow-sm">
-        <div class="card-body">
+                <div class="card-body">
             <h5 class="card-title fw-bold mb-4" style="color: #1e293b;">Menu Items</h5>
-            
-            {% if sections %}
-                {% for section in sections %}
+                    
+                    {% if sections %}
+                        {% for section in sections %}
                     <div class="section mb-5 border-bottom pb-4">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
                             <h3 class="h4 fw-bold mb-0" style="color: #2c3e50;">{{ section.name }}</h3>
                             <button class="btn btn-danger btn-sm rounded-pill px-3 delete-section" data-section-id="{{ section.id }}">
                                 <i class="fas fa-trash me-2"></i>Delete Section
-                            </button>
-                        </div>
-                        <div class="table-responsive">
+                                            </button>
+                                </div>
+                                <div class="table-responsive">
                             <table class="table table-hover align-middle">
-                                <thead>
-                                    <tr>
+                                        <thead>
+                                            <tr>
                                         <th scope="col">Image</th>
                                         <th scope="col">Name</th>
                                         <th scope="col">Description</th>
@@ -66,12 +66,12 @@
                                         <th scope="col">Quantity</th>
                                         <th scope="col">Status</th>
                                         <th scope="col">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for item in menu_items %}
-                                        {% if item.section == section %}
-                                            <tr>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in menu_items %}
+                                                {% if item.section == section %}
+                                                    <tr>
                                                 <td>
                                                     {% if item.photo %}
                                                         <img src="{{ item.photo.url }}" alt="{{ item.name }}" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
@@ -79,18 +79,18 @@
                                                         <i class="fas fa-image fa-2x text-muted"></i>
                                                     {% endif %}
                                                 </td>
-                                                <td>{{ item.name }}</td>
-                                                <td>{{ item.description|default:"-" }}</td>
-                                                <td>₹{{ item.price }}</td>
-                                                <td>{{ item.quantity }}</td>
-                                                <td>
+                                                        <td>{{ item.name }}</td>
+                                                        <td>{{ item.description|default:"-" }}</td>
+                                                        <td>₹{{ item.price }}</td>
+                                                        <td>{{ item.quantity }}</td>
+                                                        <td>
                                                     <span class="badge rounded-pill {% if item.is_available %}bg-success{% else %}bg-danger{% endif %} py-2 px-3">
-                                                        {{ item.is_available|yesno:"Available,Unavailable" }}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex">
-                                                        <button class="btn btn-sm btn-primary me-2 rounded-pill edit-item-btn" 
+                                                                {{ item.is_available|yesno:"Available,Unavailable" }}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                    <div class="d-flex gap-2">
+                                                        <button class="btn btn-sm btn-outline-primary rounded-circle action-btn edit-item-btn" 
                                                                 data-bs-toggle="modal" 
                                                                 data-bs-target="#editItemModal"
                                                                 data-item-id="{{ item.id }}"
@@ -99,35 +99,46 @@
                                                                 data-item-price="{{ item.price }}"
                                                                 data-item-quantity="{{ item.quantity }}"
                                                                 data-item-section-id="{{ item.section.id|default:"" }}"
-                                                                data-item-photo-url="{% if item.photo %}{{ item.photo.url }}{% endif %}">
-                                                            <i class="fas fa-edit"></i> Edit
+                                                                data-item-photo-url="{% if item.photo %}{{ item.photo.url }}{% endif %}"
+                                                                data-item-is-available="{{ item.is_available }}"
+                                                                data-bs-toggle="tooltip" 
+                                                                data-bs-placement="top" 
+                                                                title="Edit Item">
+                                                                    <i class="fas fa-edit"></i>
                                                         </button>
-                                                        <button class="btn btn-sm btn-danger me-2 rounded-pill delete-item" data-item-id="{{ item.id }}">
-                                                            <i class="fas fa-trash"></i> Delete
+                                                        <button class="btn btn-sm btn-outline-danger rounded-circle action-btn delete-item" 
+                                                                data-item-id="{{ item.id }}"
+                                                                data-bs-toggle="tooltip" 
+                                                                data-bs-placement="top" 
+                                                                title="Delete Item">
+                                                                    <i class="fas fa-trash"></i>
                                                         </button>
-                                                        <button class="btn btn-sm {% if item.is_available %}btn-warning{% else %}btn-success{% endif %} rounded-pill toggle-availability" data-item-id="{{ item.id }}">
-                                                            <i class="fas {% if item.is_available %}fa-times{% else %}fa-check{% endif %}"></i>
-                                                            {{ item.is_available|yesno:"Unavail,Avail" }}
+                                                        <button class="btn btn-sm {% if item.is_available %}btn-outline-warning{% else %}btn-outline-success{% endif %} rounded-circle action-btn toggle-availability" 
+                                                                data-item-id="{{ item.id }}"
+                                                                data-bs-toggle="tooltip" 
+                                                                data-bs-placement="top" 
+                                                                title="{% if item.is_available %}Make Unavailable{% else %}Make Available{% endif %}">
+                                                                    <i class="fas {% if item.is_available %}fa-times{% else %}fa-check{% endif %}"></i>
                                                         </button>
                                                     </div>
                                                 </td>
                                             </tr>
-                                        {% endif %}
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                {% endfor %}
-            {% endif %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
 
-            {% if unsectioned_items %}
-                <div class="section mb-4">
+                    {% if unsectioned_items %}
+                        <div class="section mb-4">
                     <h3 class="h4 fw-bold mb-3" style="color: #2c3e50;">Unsectioned Items</h3>
-                    <div class="table-responsive">
+                            <div class="table-responsive">
                         <table class="table table-hover align-middle">
-                            <thead>
-                                <tr>
+                                    <thead>
+                                        <tr>
                                     <th scope="col">Image</th>
                                     <th scope="col">Name</th>
                                     <th scope="col">Description</th>
@@ -135,11 +146,11 @@
                                     <th scope="col">Quantity</th>
                                     <th scope="col">Status</th>
                                     <th scope="col">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for item in unsectioned_items %}
-                                    <tr>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in unsectioned_items %}
+                                            <tr>
                                         <td>
                                             {% if item.photo %}
                                                 <img src="{{ item.photo.url }}" alt="{{ item.name }}" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
@@ -147,47 +158,58 @@
                                                 <i class="fas fa-image fa-2x text-muted"></i>
                                             {% endif %}
                                         </td>
-                                        <td>{{ item.name }}</td>
-                                        <td>{{ item.description|default:"-" }}</td>
-                                        <td>₹{{ item.price }}</td>
-                                        <td>{{ item.quantity }}</td>
-                                        <td>
+                                                <td>{{ item.name }}</td>
+                                                <td>{{ item.description|default:"-" }}</td>
+                                                <td>₹{{ item.price }}</td>
+                                                <td>{{ item.quantity }}</td>
+                                                <td>
                                             <span class="badge rounded-pill {% if item.is_available %}bg-success{% else %}bg-danger{% endif %} py-2 px-3">
-                                                {{ item.is_available|yesno:"Available,Unavailable" }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex">
-                                                <button class="btn btn-sm btn-primary me-2 rounded-pill edit-item-btn" 
-                                                        data-bs-toggle="modal" 
-                                                        data-bs-target="#editItemModal"
-                                                        data-item-id="{{ item.id }}"
-                                                        data-item-name="{{ item.name }}"
-                                                        data-item-description="{{ item.description|default:"" }}"
-                                                        data-item-price="{{ item.price }}"
-                                                        data-item-quantity="{{ item.quantity }}"
-                                                        data-item-section-id="{{ item.section.id|default:"" }}"
-                                                        data-item-photo-url="{% if item.photo %}{{ item.photo.url }}{% endif %}">
-                                                            <i class="fas fa-edit"></i> Edit
+                                                        {{ item.is_available|yesno:"Available,Unavailable" }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex gap-2">
+                                                        <button class="btn btn-sm btn-outline-primary rounded-circle action-btn edit-item-btn" 
+                                                                data-bs-toggle="modal" 
+                                                                data-bs-target="#editItemModal"
+                                                                data-item-id="{{ item.id }}"
+                                                                data-item-name="{{ item.name }}"
+                                                                data-item-description="{{ item.description|default:"" }}"
+                                                                data-item-price="{{ item.price }}"
+                                                                data-item-quantity="{{ item.quantity }}"
+                                                                data-item-section-id="{{ item.section.id|default:"" }}"
+                                                                data-item-photo-url="{% if item.photo %}{{ item.photo.url }}{% endif %}"
+                                                                data-item-is-available="{{ item.is_available }}"
+                                                                data-bs-toggle="tooltip" 
+                                                                data-bs-placement="top" 
+                                                                title="Edit Item">
+                                                                    <i class="fas fa-edit"></i>
                                                         </button>
-                                                <button class="btn btn-sm btn-danger me-2 rounded-pill delete-item" data-item-id="{{ item.id }}">
-                                                    <i class="fas fa-trash"></i> Delete
-                                                </button>
-                                                <button class="btn btn-sm {% if item.is_available %}btn-warning{% else %}btn-success{% endif %} rounded-pill toggle-availability" data-item-id="{{ item.id }}">
-                                                    <i class="fas {% if item.is_available %}fa-times{% else %}fa-check{% endif %}"></i>
-                                                    {{ item.is_available|yesno:"Unavail,Avail" }}
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            {% endif %}
+                                                        <button class="btn btn-sm btn-outline-danger rounded-circle action-btn delete-item" 
+                                                                data-item-id="{{ item.id }}"
+                                                                data-bs-toggle="tooltip" 
+                                                                data-bs-placement="top" 
+                                                                title="Delete Item">
+                                                                    <i class="fas fa-trash"></i>
+                                                        </button>
+                                                        <button class="btn btn-sm {% if item.is_available %}btn-outline-warning{% else %}btn-outline-success{% endif %} rounded-circle action-btn toggle-availability" 
+                                                                data-item-id="{{ item.id }}"
+                                                                data-bs-toggle="tooltip" 
+                                                                data-bs-placement="top" 
+                                                                title="{% if item.is_available %}Make Unavailable{% else %}Make Available{% endif %}">
+                                                                    <i class="fas {% if item.is_available %}fa-times{% else %}fa-check{% endif %}"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    {% endif %}
 
-            {% if not sections and not unsectioned_items %}
+                    {% if not sections and not unsectioned_items %}
                 <div class="text-center py-5">
                     <div class="alert alert-info border-0 shadow-sm mb-4">
                         <h4 class="alert-heading fw-bold mb-2">No Menu Items Yet!</h4>
@@ -311,17 +333,17 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body px-4 pt-0 pb-4">
-                <form method="post" action="{% url 'menu:add_section' menu_id=menu_link.id %}">
+                <form method="post" action="{% url 'menu:add_section' menu_id=menu_link.id %}" class="needs-validation" novalidate>
                     {% csrf_token %}
-                    {% for field in section_form %}
-                        <div class="mb-3">
-                            {{ field.label_tag }}
-                            {{ field }}
-                            {% for error in field.errors %}
-                                <div class="text-danger">{{ error }}</div>
-                            {% endfor %}
+                    <div class="mb-4">
+                        <label for="id_name" class="form-label fw-medium">Section Name</label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text"><i class="fas fa-folder"></i></span>
+                            <input type="text" class="form-control" id="id_name" name="name" required>
+                            <div class="invalid-feedback">Please enter a section name.</div>
                         </div>
-                    {% endfor %}
+                    </div>
+
                     <div class="d-flex justify-content-end pt-3">
                         <button type="button" class="btn btn-light rounded-pill px-4 me-2" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-success rounded-pill px-4">
@@ -613,6 +635,7 @@
             const itemQuantity = $(this).data('item-quantity');
             const itemSectionId = $(this).data('item-section-id');
             const itemPhotoUrl = $(this).data('item-photo-url');
+            const itemIsAvailable = $(this).data('item-is-available');
 
             // Populate form fields
             $('#edit-item-id').val(itemId);
@@ -620,7 +643,7 @@
             $('#edit-item-description').val(itemDescription);
             $('#edit-item-price').val(itemPrice);
             $('#edit-item-quantity').val(itemQuantity);
-            $('#edit-item-is-available').prop('checked', true); // Always set to true
+            $('#edit-item-is-available').prop('checked', itemIsAvailable);
             $('#edit-item-section').val(itemSectionId);
 
             // Display current photo or placeholder in edit modal
@@ -650,6 +673,7 @@
             e.preventDefault(); // Prevent default form submission
             const form = $(this);
             const formData = new FormData(form[0]);
+            const itemId = $('#edit-item-id').val();
 
             $.ajax({
                 url: form.attr('action'),
@@ -660,37 +684,63 @@
                 success: function(response) {
                     if (response.status === 'success') {
                         $('#editItemModal').modal('hide');
-                        // Update the table row directly with the new data
-                        const updatedItem = response.item;
-                        const row = $(`tr[data-item-id="${updatedItem.id}"]`);
-                        if (row.length) {
-                            // Update cells
-                            row.find('td:eq(0)').html(updatedItem.photo_url ? `<img src="${updatedItem.photo_url}" alt="${updatedItem.name}" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">` : '<i class="fas fa-image fa-2x text-muted"></i>');
-                            row.find('td:eq(1)').text(updatedItem.name);
-                            row.find('td:eq(2)').text(updatedItem.description || '-');
-                            row.find('td:eq(3)').text(`₹${updatedItem.price}`);
-                            row.find('td:eq(4)').text(updatedItem.quantity);
-                            const statusBadge = `<span class="badge rounded-pill ${updatedItem.is_available ? 'bg-success' : 'bg-danger'} py-2 px-3">
-                                                    ${updatedItem.is_available ? 'Available' : 'Unavailable'}
-                                                 </span>`;
-                            row.find('td:eq(5)').html(statusBadge);
+                        
+                        // Find the table row containing this item
+                        const row = $(`button[data-item-id="${itemId}"]`).closest('tr');
+                        
+                        // Update the row content
+                        row.find('td:eq(0)').html(response.item.photo_url ? 
+                            `<img src="${response.item.photo_url}" alt="${response.item.name}" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">` : 
+                            '<i class="fas fa-image fa-2x text-muted"></i>');
+                        row.find('td:eq(1)').text(response.item.name);
+                        row.find('td:eq(2)').text(response.item.description || '-');
+                        row.find('td:eq(3)').text(`₹${response.item.price}`);
+                        row.find('td:eq(4)').text(response.item.quantity);
+                        
+                        // Update status badge
+                        const statusBadge = `<span class="badge rounded-pill ${response.item.is_available ? 'bg-success' : 'bg-danger'} py-2 px-3">
+                            ${response.item.is_available ? 'Available' : 'Unavailable'}
+                        </span>`;
+                        row.find('td:eq(5)').html(statusBadge);
 
-                            // Update toggle availability button text and class
-                            const toggleBtn = row.find('.toggle-availability');
-                            if (updatedItem.is_available) {
-                                toggleBtn.removeClass('btn-success').addClass('btn-warning').html('<i class="fas fa-times"></i> Unavail');
-                            } else {
-                                toggleBtn.removeClass('btn-warning').addClass('btn-success').html('<i class="fas fa-check"></i> Avail');
-                            }
+                        // Update the edit button data attributes
+                        const editBtn = row.find('.edit-item-btn');
+                        editBtn.attr('data-item-name', response.item.name);
+                        editBtn.attr('data-item-description', response.item.description || '');
+                        editBtn.attr('data-item-price', response.item.price);
+                        editBtn.attr('data-item-quantity', response.item.quantity);
+                        editBtn.attr('data-item-section-id', response.item.section_id || '');
+                        editBtn.attr('data-item-photo-url', response.item.photo_url || '');
+                        editBtn.attr('data-item-is-available', response.item.is_available);
+
+                        // Update toggle availability button
+                        const toggleBtn = row.find('.toggle-availability');
+                        if (response.item.is_available) {
+                            toggleBtn.removeClass('btn-outline-success').addClass('btn-outline-warning')
+                                .html('<i class="fas fa-times"></i>')
+                                .attr('title', 'Make Unavailable');
+                        } else {
+                            toggleBtn.removeClass('btn-outline-warning').addClass('btn-outline-success')
+                                .html('<i class="fas fa-check"></i>')
+                                .attr('title', 'Make Available');
                         }
-                        // Optionally, show a temporary success message
-                        // messages.success(request, response.message); // Not directly supported by client-side JS
+
+                        // Show success message
+                        const successAlert = `
+                            <div class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3" role="alert" style="z-index: 1050;">
+                                <i class="fas fa-check-circle me-2"></i>Item updated successfully!
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        `;
+                        $('body').append(successAlert);
+                        setTimeout(() => {
+                            $('.alert-success').alert('close');
+                        }, 3000);
                     } else {
                         alert(response.message || 'An unknown error occurred.');
                     }
                 },
                 error: function(xhr, status, error) {
-                    // Parse and display validation errors
                     try {
                         const errorResponse = JSON.parse(xhr.responseText);
                         if (errorResponse.errors) {
@@ -1070,6 +1120,11 @@
             $('#editItemModal .form-control').removeClass('is-invalid');
             $('#editItemModal .form-select').removeClass('is-invalid');
         });
+
+        // Update tooltips for action buttons
+        document.querySelectorAll('.action-btn').forEach(button => {
+            button.setAttribute('data-title', button.getAttribute('title'));
+        });
     });
 </script>
 <style>
@@ -1220,6 +1275,71 @@
     .modal .form-check-label {
         color: #666;
         margin-left: 0.5rem;
+    }
+
+    /* Action button styles */
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        border-width: 1px;
+    }
+
+    .action-btn i {
+        font-size: 0.9rem;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .btn-outline-primary {
+        color: #0ea5e9;
+        border-color: #0ea5e9;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #0ea5e9;
+        border-color: #0ea5e9;
+        color: white;
+    }
+
+    .btn-outline-danger {
+        color: #ef4444;
+        border-color: #ef4444;
+    }
+
+    .btn-outline-danger:hover {
+        background-color: #ef4444;
+        border-color: #ef4444;
+        color: white;
+    }
+
+    .btn-outline-warning {
+        color: #f59e0b;
+        border-color: #f59e0b;
+    }
+
+    .btn-outline-warning:hover {
+        background-color: #f59e0b;
+        border-color: #f59e0b;
+        color: white;
+    }
+
+    .btn-outline-success {
+        color: #10b981;
+        border-color: #10b981;
+    }
+
+    .btn-outline-success:hover {
+        background-color: #10b981;
+        border-color: #10b981;
+        color: white;
     }
 </style>
 {% endblock %}
