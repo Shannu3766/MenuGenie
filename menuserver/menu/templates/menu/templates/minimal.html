@@ -1,58 +1,39 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ menu_link.restaurant.name }} - Menu{% endblock %}
+{% block title %}{{ menu.restaurant.name }} - Menu{% endblock %}
 
 {% block content %}
 <div class="menu-container">
     <!-- Restaurant Header -->
     <div class="restaurant-header">
-        {% if menu_link.restaurant.image %}
-            <img src="{{ current_site }}{{ menu_link.restaurant.image.url }}" alt="{{ menu_link.restaurant.name }}" class="restaurant-image">
+        {% if menu.restaurant.image %}
+            <img src="{{ menu.restaurant.image.url }}" alt="{{ menu.restaurant.name }}" class="restaurant-image">
         {% endif %}
-        <h1 class="restaurant-name">{{ menu_link.restaurant.name }}</h1>
-        {% if menu_link.restaurant.description %}
-            <p class="restaurant-description">{{ menu_link.restaurant.description }}</p>
+        <h1 class="restaurant-name">{{ menu.restaurant.name }}</h1>
+        {% if menu.restaurant.tagline %}
+            <p class="restaurant-description">{{ menu.restaurant.tagline }}</p>
         {% endif %}
     </div>
 
     <!-- Menu Sections -->
     <div class="menu-sections">
-        {% if is_preview and sample_sections %}
-            {% for section in sample_sections %}
-                <div class="menu-section">
-                    <h2 class="section-title">{{ section.name }}</h2>
-                    <div class="menu-items">
-                        {% for item in section.items %}
-                            <div class="menu-item">
-                                <div class="item-info">
-                                    <h3 class="item-name">{{ item.name }}</h3>
-                                    <p class="item-description">{{ item.description }}</p>
-                                </div>
-                                <div class="item-price">${{ item.price }}</div>
+        {% for section in menu.sections %}
+            <div class="menu-section">
+                <h2 class="section-title">{{ section.name }}</h2>
+                <div class="menu-items">
+                    {% for item in section.items %}
+                        <div class="menu-item">
+                            <div class="item-info">
+                                <h3 class="item-name">{{ item.name }}</h3>
+                                <p class="item-description">{{ item.description }}</p>
                             </div>
-                        {% endfor %}
-                    </div>
+                            <div class="item-price">${{ item.price }}</div>
+                        </div>
+                    {% endfor %}
                 </div>
-            {% endfor %}
-        {% else %}
-            {% for section in menu_link.sections.all %}
-                <div class="menu-section">
-                    <h2 class="section-title">{{ section.name }}</h2>
-                    <div class="menu-items">
-                        {% for item in section.items.all %}
-                            <div class="menu-item">
-                                <div class="item-info">
-                                    <h3 class="item-name">{{ item.name }}</h3>
-                                    <p class="item-description">{{ item.description }}</p>
-                                </div>
-                                <div class="item-price">${{ item.price }}</div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endfor %}
-        {% endif %}
+            </div>
+        {% endfor %}
     </div>
 </div>
 

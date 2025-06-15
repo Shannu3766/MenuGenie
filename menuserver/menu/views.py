@@ -308,22 +308,32 @@ def public_menu(request, user_id, restaurant_name):
     if not menu_link:
         raise Http404("No MenuLink matches the given query.")
     
-    restaurant = menu_link.restaurant
-    
-    # Get the template from the database
-    template = menu_link.template
-    
-    # Prepare menu data
-    menu_data = {
-        'restaurant': restaurant,
-        'menu_link': menu_link,
-        'sections': menu_link.sections.all().order_by('name'),
-        'items': MenuItem.objects.filter(menu=menu_link).order_by('section__name', 'name'),
-        'template': template,
+    # Prepare menu data with the structure expected by the templates
+    menu = {
+        'restaurant': menu_link.restaurant,
+        'sections': []
     }
     
+    # Add sections and their items
+    for section in menu_link.sections.all().order_by('name'):
+        section_data = {
+            'name': section.name,
+            'items': []
+        }
+        # Use the reverse relationship to get items
+        for item in MenuItem.objects.filter(menu=menu_link, section=section).order_by('name'):
+            section_data['items'].append({
+                'name': item.name,
+                'description': item.description,
+                'price': item.price,
+                'photo': item.photo
+            })
+        menu['sections'].append(section_data)
+    
     # Render using the template from the templates subdirectory
-    return render(request, f'menu/templates/{template.template_file}', menu_data)
+    return render(request, f'menu/templates/{menu_link.template.template_file}', {
+        'menu': menu
+    })
 
 @login_required
 def delete_section(request, menu_id, section_id):
@@ -439,7 +449,9 @@ def template_preview(request, template_id):
     Preview a menu template with sample data
     """
     template = get_object_or_404(MenuTemplate, id=template_id)
-    sample_menu = {
+    
+    # Create a sample menu with the structure expected by the templates
+    menu = {
         'restaurant': {
             'name': 'Sample Restaurant',
             'tagline': 'Delicious Food & Drinks',
@@ -462,11 +474,28 @@ def template_preview(request, template_id):
                         'photo': None
                     }
                 ]
+            },
+            {
+                'name': 'Main Courses',
+                'items': [
+                    {
+                        'name': 'Sample Main 1',
+                        'description': 'A hearty main course',
+                        'price': '19.99',
+                        'photo': None
+                    },
+                    {
+                        'name': 'Sample Main 2',
+                        'description': 'Another satisfying option',
+                        'price': '22.99',
+                        'photo': None
+                    }
+                ]
             }
         ]
     }
     
-    return render(request, template.template_file, {
-        'menu': sample_menu,
+    return render(request, f'menu/templates/{template.template_file}', {
+        'menu': menu,
         'is_preview': True
     })
