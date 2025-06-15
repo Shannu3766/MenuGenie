@@ -11,24 +11,23 @@ class MenuItemInline(admin.TabularInline):
 @admin.register(Restaurant)
 class RestaurantAdmin(admin.ModelAdmin):
     list_display = ('name', 'user', 'created_at')
-    list_filter = ('user', 'created_at')
-    search_fields = ('name', 'user__username')
+    list_filter = ('user',)
+    search_fields = ('name',)
 
 @admin.register(MenuLink)
 class MenuLinkAdmin(admin.ModelAdmin):
-    list_display = ('restaurant', 'user', 'template', 'created_at')
-    list_filter = ('user', 'template', 'created_at')
-    search_fields = ('restaurant__name', 'user__username')
-    inlines = [MenuItemInline]
+    list_display = ('restaurant', 'user', 'created_at')
+    list_filter = ('user',)
+    search_fields = ('restaurant__name',)
 
 @admin.register(MenuSection)
 class MenuSectionAdmin(admin.ModelAdmin):
     list_display = ('name', 'menu', 'created_at')
-    list_filter = ('menu__restaurant', 'created_at')
-    search_fields = ('name', 'menu__restaurant__name')
+    list_filter = ('menu',)
+    search_fields = ('name',)
 
 @admin.register(MenuItem)
 class MenuItemAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'section', 'menu', 'is_available')
-    list_filter = ('is_available', 'section', 'menu__restaurant')
-    search_fields = ('name', 'menu__restaurant__name') 
+    list_display = ('name', 'menu', 'section', 'price', 'is_available')
+    list_filter = ('menu', 'section', 'is_available')
+    search_fields = ('name', 'description') 

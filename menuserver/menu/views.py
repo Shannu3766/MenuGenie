@@ -16,10 +16,7 @@ from django.utils.text import slugify
 
 @login_required
 def my_restaurants(request):
-    if not request.user.is_restaurant_owner:
-        messages.error(request, 'You must be a restaurant owner to access this page.')
-        return redirect('home')
-    menu_links = MenuLink.objects.filter(user=request.user)
+    menu_links = MenuLink.objects.filter(user=request.user).select_related('restaurant').order_by('-created_at')
     return render(request, 'menu/my_restaurants.html', {
         'menu_links': menu_links
     })
@@ -50,7 +47,8 @@ def create_restaurant(request):
         restaurant = Restaurant.objects.create(
             name=restaurant_name,
             tagline=restaurant_tagline,
-            image=restaurant_image
+            image=restaurant_image,
+            user=request.user
         )
         
         # Create menu link
@@ -59,7 +57,7 @@ def create_restaurant(request):
             restaurant=restaurant
         )
         
-        return redirect('menu:select_template', menu_id=menu_link.id)
+        return redirect('menu:manage_menu', menu_id=menu_link.id)
     
     return render(request, 'menu/create_restaurant.html')
 
@@ -84,7 +82,7 @@ def import_restaurant(request):
                 return redirect('menu:my_restaurants')
             except IntegrityError:
                 messages.error(request, f'A restaurant named "{restaurant_name}" already exists. Please choose a different name.')
-                return render(request, 'menu/import_restaurant.html', {'restaurant_name': restaurant_name})
+                return render(request, 'menu/import_restaurant.html')
     return render(request, 'menu/import_restaurant.html')
 
 @login_required
@@ -205,7 +203,7 @@ def manage_menu(request, menu_id):
         'upload_form': upload_form,
         'sections': sections,
         'menu_items': menu_items,
-        'unsectioned_items': unsectioned_items,
+        'unsectioned_items': unsectioned_items
     })
 
 @login_required
@@ -267,7 +265,7 @@ def edit_menu_item(request, menu_id, item_id):
                     'id': updated_item.id,
                     'name': updated_item.name,
                     'description': updated_item.description,
-                    'price': str(updated_item.price), # Convert Decimal to string for JSON
+                    'price': str(updated_item.price),
                     'quantity': updated_item.quantity,
                     'is_available': updated_item.is_available,
                     'photo_url': updated_item.photo.url if updated_item.photo else None,
@@ -275,21 +273,17 @@ def edit_menu_item(request, menu_id, item_id):
                 }
             })
         else:
-            # Return form errors as JSON
             return JsonResponse({
                 'status': 'error',
                 'message': 'Error updating menu item.',
                 'errors': form.errors.as_json()
             }, status=400)
     else:
-        # This part will no longer be directly used for rendering the modal content,
-        # but it's good to keep it consistent if it's still used elsewhere.
         form = MenuItemForm(instance=menu_item)
     
     return render(request, 'menu/edit_menu_item.html', {
         'form': form,
-        'menu_link': menu_link,
-        'menu_item': menu_item
+        'menu_link': menu_link
     })
 
 def public_menu(request, user_id, restaurant_name):
@@ -320,7 +314,7 @@ def public_menu(request, user_id, restaurant_name):
         'unsectioned_items': unsectioned_items,
     }
     
-    return render(request, f'menu/templates/public_menu_{menu_link.template}.html', context)
+    return render(request, 'menu/public_menu.html', context)
 
 @login_required
 def delete_section(request, menu_id, section_id):
@@ -405,18 +399,3 @@ def edit_restaurant(request, menu_id):
         return redirect('menu:my_restaurants')
     
     return render(request, 'menu/edit_restaurant.html', {'menu_link': menu_link})
-
-@login_required
-def change_template(request, menu_id):
-    menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
-    
-    if request.method == 'POST':
-        template = request.POST.get('template')
-        if template in dict(MenuLink.TEMPLATE_CHOICES):
-            menu_link.template = template
-            menu_link.save()
-            messages.success(request, 'Menu template updated successfully!')
-        else:
-            messages.error(request, 'Invalid template selected.')
-    
-    return redirect('menu:my_restaurants')

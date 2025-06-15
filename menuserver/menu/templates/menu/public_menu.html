@@ -1,209 +1,116 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}{{ menu_link.restaurant_name }}{% endblock %}
+{% block title %}{{ menu_link.restaurant.name }} - Menu{% endblock %}
 
 {% block content %}
-<div class="restaurant-header position-relative">
-    <div class="restaurant-image-wrapper">
-        {% if menu_link.restaurant_image.url %}
-            <img src="{{ menu_link.restaurant_image.url }}" alt="{{ menu_link.restaurant_name }}" class="restaurant-image">
-        {% else %}
-            <div class="bg-light d-flex align-items-center justify-content-center restaurant-image" style="height: 100%; width: 100%;">
-                <i class="fas fa-utensils fa-5x text-muted"></i>
-            </div>
-        {% endif %}
-        <div class="overlay"></div>
-    </div>
-    <div class="restaurant-info text-center">
-        <h1 class="restaurant-name">{{ menu_link.restaurant_name }}</h1>
-    </div>
-</div>
-
 <div class="container py-5">
-    {% if sections %}
-        {% for section in sections %}
-            <div class="menu-section mb-5">
-                <h2 class="section-title">{{ section.name }}</h2>
-                <div class="row">
-                    {% for item in section.items %}
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Restaurant Header -->
+            <div class="text-center mb-5">
+                {% if menu_link.restaurant.image %}
+                <img src="{{ menu_link.restaurant.image.url }}" alt="{{ menu_link.restaurant.name }}" class="img-fluid rounded-circle mb-3" style="max-width: 200px; height: 200px; object-fit: cover;">
+                {% endif %}
+                <h1 class="display-4 mb-2">{{ menu_link.restaurant.name }}</h1>
+                {% if menu_link.restaurant.tagline %}
+                <p class="lead text-muted">{{ menu_link.restaurant.tagline }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Menu Sections -->
+            {% for section in sections %}
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">{{ section.name }}</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for item in sectioned_items %}
+                        {% if item.section == section %}
                         <div class="col-md-6 mb-4">
-                            <div class="menu-item card border-0 shadow-sm h-100">
-                                <div class="menu-item-image-wrapper">
-                                    {% if item.photo %}
-                                        <img src="{{ item.photo.url }}" class="card-img-top" alt="{{ item.name }}">
-                                    {% else %}
-                                        <div class="menu-item-placeholder d-flex align-items-center justify-content-center">
-                                            <i class="fas fa-utensils fa-3x text-muted"></i>
-                                        </div>
-                                    {% endif %}
-                                </div>
-                               <div class="card-body">
+                            <div class="card h-100">
+                                {% if item.photo %}
+                                <img src="{{ item.photo.url }}" class="card-img-top" alt="{{ item.name }}" style="height: 200px; object-fit: cover;">
+                                {% endif %}
+                                <div class="card-body">
                                     <h5 class="card-title">{{ item.name }}</h5>
+                                    {% if item.description %}
                                     <p class="card-text text-muted">{{ item.description }}</p>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <span class="price">₹{{ item.price }}</span>
-                                        {% if not item.is_available %}
-                                            <span class="badge bg-danger">Not Available</span>
+                                    {% endif %}
+                                    <p class="card-text">
+                                        <strong class="text-primary">₹{{ item.price }}</strong>
+                                        {% if item.quantity > 1 %}
+                                        <small class="text-muted">({{ item.quantity }} items)</small>
                                         {% endif %}
-                                    </div>
+                                    </p>
                                 </div>
                             </div>
                         </div>
-                    {% endfor %}
+                        {% endif %}
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
-        {% endfor %}
-    {% endif %}
+            {% endfor %}
 
-    {% if unsectioned_items %}
-        <div class="menu-section mb-5">
-            <h2 class="section-title">Other Items</h2>
-            <div class="row">
-                {% for item in unsectioned_items %}
-                    <div class="col-md-6 mb-4">
-                        <div class="menu-item card border-0 shadow-sm h-100">
-                            <div class="menu-item-image-wrapper">
+            <!-- Unsectioned Items -->
+            {% if unsectioned_items %}
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">Other Items</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for item in unsectioned_items %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
                                 {% if item.photo %}
-                                    <img src="{{ item.photo.url }}" class="card-img-top" alt="{{ item.name }}">
-                                {% else %}
-                                    <div class="menu-item-placeholder d-flex align-items-center justify-content-center">
-                                        <i class="fas fa-utensils fa-3x text-muted"></i>
-                                    </div>
+                                <img src="{{ item.photo.url }}" class="card-img-top" alt="{{ item.name }}" style="height: 200px; object-fit: cover;">
                                 {% endif %}
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title">{{ item.name }}</h5>
-                                <p class="card-text text-muted">{{ item.description }}</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="price">₹{{ item.price }}</span>
-                                    {% if not item.is_available %}
-                                        <span class="badge bg-danger">Not Available</span>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ item.name }}</h5>
+                                    {% if item.description %}
+                                    <p class="card-text text-muted">{{ item.description }}</p>
                                     {% endif %}
+                                    <p class="card-text">
+                                        <strong class="text-primary">₹{{ item.price }}</strong>
+                                        {% if item.quantity > 1 %}
+                                        <small class="text-muted">({{ item.quantity }} items)</small>
+                                        {% endif %}
+                                    </p>
                                 </div>
                             </div>
                         </div>
+                        {% endfor %}
                     </div>
-                {% endfor %}
+                </div>
             </div>
+            {% endif %}
         </div>
-    {% endif %}
+    </div>
 </div>
 
 <style>
-    body {
-        background-color: #f8f9fa;
-    }
+.card {
+    transition: transform 0.2s;
+}
 
-    .restaurant-header {
-        position: relative;
-        margin-bottom: 2rem;
-    }
+.card:hover {
+    transform: translateY(-5px);
+}
 
-    .restaurant-image-wrapper {
-        position: relative;
-        height: 300px;
-        overflow: hidden;
-    }
+.card-img-top {
+    border-top-left-radius: calc(0.25rem - 1px);
+    border-top-right-radius: calc(0.25rem - 1px);
+}
 
-    .restaurant-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        filter: brightness(0.7);
-    }
+.text-primary {
+    color: #007bff !important;
+}
 
-    .overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7));
-    }
-
-    .restaurant-info {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 100%;
-        z-index: 1;
-    }
-
-    .restaurant-name {
-        color: white;
-        font-size: 3rem;
-        font-weight: 700;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        margin: 0;
-    }
-
-    .menu-section {
-        margin-bottom: 3rem;
-    }
-
-    .section-title {
-        color: #1e293b;
-        font-size: 2rem;
-        font-weight: 600;
-        margin-bottom: 1.5rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 2px solid #e2e8f0;
-    }
-
-    .menu-item {
-        transition: transform 0.2s ease-in-out;
-        border-radius: 15px;
-    }
-
-    .menu-item:hover {
-        transform: translateY(-5px);
-    }
-
-    .card-title {
-        color: #1e293b;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-    }
-
-    .price {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #0ea5e9;
-    }
-
-    .badge {
-        font-size: 0.875rem;
-        padding: 0.5rem 1rem;
-        border-radius: 50px;
-    }
-
-    @media (max-width: 768px) {
-        .restaurant-image-wrapper {
-            height: 200px;
-        }
-
-        .restaurant-name {
-            font-size: 2rem;
-        }
-    }
-
-    .menu-item-image-wrapper {
-        height: 200px; /* Fixed height for image or placeholder */
-        overflow: hidden;
-        background-color: #f8f9fa;
-    }
-
-    .menu-item-image-wrapper img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .menu-item-placeholder {
-        width: 100%;
-        height: 100%;
-        background-color: #e9ecef; /* Light gray background for placeholder */
-    }
+.bg-primary {
+    background-color: #007bff !important;
+}
 </style>
 {% endblock %} 
