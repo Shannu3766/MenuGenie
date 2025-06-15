@@ -134,7 +134,7 @@
                                 </div>
                             </div>
                             <div class="modal-footer border-0">
-                                <form method="post" action="{% url 'menu:change_template' link.id %}">
+                                <form method="post" action="{% url 'menu:change_template' link.id %}" class="d-inline">
                                     {% csrf_token %}
                                     <input type="hidden" name="template" id="selectedTemplate{{ link.id }}" value="{{ link.template.id }}">
                                     <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>

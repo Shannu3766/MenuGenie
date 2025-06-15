@@ -433,15 +433,11 @@ def change_template(request, menu_id):
             menu_link.template = template
             menu_link.save()
             
-            return JsonResponse({
-                'status': 'success',
-                'message': 'Template updated successfully'
-            })
+            messages.success(request, 'Template updated successfully!')
+            return redirect('menu:my_restaurants')
     
-    return JsonResponse({
-        'status': 'error',
-        'message': 'Invalid request'
-    }, status=400)
+    messages.error(request, 'Invalid request')
+    return redirect('menu:my_restaurants')
 
 @login_required
 def template_preview(request, template_id):
