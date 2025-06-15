@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Petit Bistro | Modern European Cuisine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500&display=swap');
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .hero-image {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1517248135467-4bab7a1e0ab7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            height: 60vh;
+        }
+        
+        .menu-item {
+            transition: all 0.3s ease;
+        }
+        
+        .menu-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .section-divider {
+            position: relative;
+            height: 1px;
+            background-color: #e5e7eb;
+            margin: 3rem 0;
+        }
+        
+        .section-divider::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 3px;
+            background-color: #d1a054;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Hero Section -->
+    <div class="hero-image flex items-center justify-center">
+        <div class="text-center px-4">
+            <h1 class="text-5xl md:text-7xl font-bold text-white font-playfair mb-4">Le Petit Bistro</h1>
+            <p class="text-xl text-white font-light tracking-wider">MODERN EUROPEAN CUISINE</p>
+        </div>
+    </div>
+    
+    <!-- Menu Container -->
+    <div class="container mx-auto px-4 py-12 max-w-6xl">
+        <!-- Appetizers Section -->
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-playfair font-bold mb-2">Appetizers</h2>
+            <p class="text-gray-500">To begin your culinary journey</p>
+            <div class="section-divider"></div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Appetizer Item 1 -->
+            <div class="menu-item bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg">
+                <div class="h-48 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1544025162-d76694265947?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80')"></div>
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="text-xl font-semibold">Truffle Arancini</h3>
+                        <span class="text-lg font-medium text-amber-700">€12</span>
+                    </div>
+                    <p class="text-gray-600 text-sm">Crispy risotto balls infused with black truffle, served with a creamy saffron aioli.</p>
+                </div>
+            </div>
+            
+            <!-- Appetizer Item 2 -->
+            <div class="menu-item bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg">
+                <div class="h-48 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1603105037880-880cd4edfb0d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80')"></div>
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="text-xl font-semibold">Burrata Salad</h3>
+                        <span class="text-lg font-medium text-amber-700">€14</span>
+                    </div>
+                    <p class="text-gray-600 text-sm">Creamy burrata with heirloom tomatoes, basil oil, and aged balsamic reduction.</p>
+                </div>
+            </div>
+            
+            <!-- Appetizer Item 3 -->
+            <div class="menu-item bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg">
+                <div class="h-48 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1606787366852-de278663ea96?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')"></div>
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="text-xl font-semibold">Foie Gras Terrine</h3>
+                        <span class="text-lg font-medium text-amber-700">€18</span>
+                    </div>
+                    <p class="text-gray-600 text-sm">Silky foie gras terrine with fig compote and toasted brioche.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Courses Section -->
+        <div class="text-center my-12">
+            <h2 class="text-3xl font-playfair font-bold mb-2">Main Courses</h2>
+            <p class="text-gray-500">Heart of our culinary experience</p>
+            <div class="section-divider"></div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Main Course Item 1 -->
+            <div class="menu-item bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg">
+                <div class="h-48 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1559847844-5315695dadae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1998&q=80')"></div>
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="text-xl font-semibold">Filet Mignon</h3>
+                        <span class="text-lg font-medium text-amber-700">€32</span>
+                    </div>
+                    <p class="text-gray-600 text-sm">8oz grass-fed beef tenderloin with truffle mashed potatoes and red wine reduction.</p>
+                </div>
+            </div>
+            
+            <!-- Main Course Item 2 -->
+            <div class="menu-item bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg">
+                <div class="h-48 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1604977043460-396f7bc889f3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')"></div>
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="text-xl font-semibold">Duck Confit</h3>
+                        <span class="text-lg font-medium text-amber-700">€28</span>
+                    </div>
+                    <p class="text-gray-600 text-sm">Slow-cooked duck leg with cherry gastrique, roasted root vegetables, and potato gratin.</p>
+                </div>
+            </div>
+            
+            <!-- Main Course Item 3 -->
+            <div class="menu-item bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg">
+                <div class="h-48 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1473093295043-cdd812d0e601?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')"></div>
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="text-xl font-semibold">Seafood Risotto</h3>
+                        <span class="text-lg font-medium text-amber-700">€26</span>
+                    </div>
+                    <p class="text-gray-600 text-sm">Creamy Arborio rice with scallops, shrimp, mussels, and saffron broth.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Desserts Section -->
+        <div class="text-center my-12">
+            <h2 class="text-3xl font-playfair font-bold mb-2">Desserts</h2>
+            <p class="text-gray-500">Sweet endings to your meal</p>
+            <div class="section-divider"></div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Dessert Item 1 -->
+            <div class="menu-item bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg">
+                <div class="h-48 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1562440499-64c9a111f713?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80')"></div>
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="text-xl font-semibold">Chocolate Soufflé</h3>
+                        <span class="text-lg font-medium text-amber-700">€10</span>
+                    </div>
+                    <p class="text-gray-600 text-sm">Warm chocolate soufflé with vanilla bean ice cream and raspberry coulis.</p>
+                </div>
+            </div>
+            
+            <!-- Dessert Item 2 -->
+            <div class="menu-item bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg">
+                <div class="h-48 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1551024506-0bccd828d307?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80')"></div>
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="text-xl font-semibold">Crème Brûlée</h3>
+                        <span class="text-lg font-medium text-amber-700">€9</span>
+                    </div>
+                    <p class="text-gray-600 text-sm">Classic vanilla bean custard with caramelized sugar crust.</p>
+                </div>
+            </div>
+            
+            <!-- Dessert Item 3 -->
+            <div class="menu-item bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg">
+                <div class="h-48 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1621303837174-89798a7ab472?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')"></div>
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="text-xl font-semibold">Apple Tarte Tatin</h3>
+                        <span class="text-lg font-medium text-amber-700">€11</span>
+                    </div>
+                    <p class="text-gray-600 text-sm">Upside-down caramelized apple tart with cinnamon ice cream.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
