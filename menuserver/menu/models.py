@@ -7,6 +7,21 @@ from django.utils.text import slugify
 
 # Create your models here.
 
+class MenuTemplate(models.Model):
+    name = models.CharField(max_length=100)
+    template_file = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    thumbnail = models.ImageField(upload_to='template_thumbnails/', blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
 class Restaurant(models.Model):
     name = models.CharField(max_length=100)
     tagline = models.CharField(max_length=200, blank=True, null=True)
@@ -21,6 +36,7 @@ class Restaurant(models.Model):
 class MenuLink(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE)
+    template = models.ForeignKey(MenuTemplate, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
