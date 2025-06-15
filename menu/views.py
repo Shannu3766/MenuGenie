@@ -483,15 +483,27 @@ def template_preview(request, template_id):
                     'name': 'Appetizers',
                     'items': [
                         {
-                            'name': 'Sample Item 1',
-                            'description': 'A delicious sample item',
-                            'price': '9.99',
+                            'name': 'Bruschetta',
+                            'description': 'Toasted bread topped with fresh tomatoes, basil, and garlic',
+                            'price': '8.99',
                             'photo': None
                         },
                         {
-                            'name': 'Sample Item 2',
-                            'description': 'Another tasty option',
+                            'name': 'Calamari',
+                            'description': 'Crispy fried squid served with marinara sauce',
                             'price': '12.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Spinach Artichoke Dip',
+                            'description': 'Creamy dip with spinach, artichokes, and melted cheese',
+                            'price': '10.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Stuffed Mushrooms',
+                            'description': 'Mushroom caps filled with herbed breadcrumbs and cheese',
+                            'price': '9.99',
                             'photo': None
                         }
                     ]
@@ -500,15 +512,114 @@ def template_preview(request, template_id):
                     'name': 'Main Courses',
                     'items': [
                         {
-                            'name': 'Sample Main 1',
-                            'description': 'A hearty main course',
-                            'price': '19.99',
+                            'name': 'Grilled Salmon',
+                            'description': 'Fresh salmon fillet with lemon butter sauce',
+                            'price': '24.99',
                             'photo': None
                         },
                         {
-                            'name': 'Sample Main 2',
-                            'description': 'Another satisfying option',
+                            'name': 'Beef Tenderloin',
+                            'description': '8oz tenderloin with red wine reduction',
+                            'price': '29.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Chicken Marsala',
+                            'description': 'Chicken breast in marsala wine sauce with mushrooms',
                             'price': '22.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Vegetable Risotto',
+                            'description': 'Creamy arborio rice with seasonal vegetables',
+                            'price': '19.99',
+                            'photo': None
+                        }
+                    ]
+                },
+                {
+                    'name': 'Pasta',
+                    'items': [
+                        {
+                            'name': 'Fettuccine Alfredo',
+                            'description': 'Fresh pasta in creamy parmesan sauce',
+                            'price': '16.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Spaghetti Carbonara',
+                            'description': 'Classic pasta with pancetta and egg sauce',
+                            'price': '17.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Lasagna',
+                            'description': 'Layers of pasta, meat sauce, and cheese',
+                            'price': '18.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Penne Arrabbiata',
+                            'description': 'Spicy tomato sauce with garlic and chili',
+                            'price': '15.99',
+                            'photo': None
+                        }
+                    ]
+                },
+                {
+                    'name': 'Desserts',
+                    'items': [
+                        {
+                            'name': 'Tiramisu',
+                            'description': 'Classic Italian dessert with coffee and mascarpone',
+                            'price': '8.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Chocolate Lava Cake',
+                            'description': 'Warm chocolate cake with molten center',
+                            'price': '9.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'New York Cheesecake',
+                            'description': 'Creamy cheesecake with berry compote',
+                            'price': '7.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Crème Brûlée',
+                            'description': 'Classic vanilla custard with caramelized sugar',
+                            'price': '8.99',
+                            'photo': None
+                        }
+                    ]
+                },
+                {
+                    'name': 'Beverages',
+                    'items': [
+                        {
+                            'name': 'Fresh Lemonade',
+                            'description': 'House-made lemonade with mint',
+                            'price': '4.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Iced Tea',
+                            'description': 'Fresh brewed black tea with lemon',
+                            'price': '3.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Sparkling Water',
+                            'description': 'Carbonated water with choice of flavor',
+                            'price': '3.49',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Fresh Fruit Smoothie',
+                            'description': 'Blend of seasonal fruits and yogurt',
+                            'price': '5.99',
                             'photo': None
                         }
                     ]
