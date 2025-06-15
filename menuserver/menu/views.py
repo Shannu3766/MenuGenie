@@ -442,54 +442,79 @@ def change_template(request, menu_id):
 @login_required
 def template_preview(request, template_id):
     """
-    Preview a menu template with sample data
+    Preview a menu template with actual menu data if available, otherwise use sample data
     """
     template = get_object_or_404(MenuTemplate, id=template_id)
+    menu_id = request.GET.get('menu_id')
     
-    # Create a sample menu with the structure expected by the templates
-    menu = {
-        'restaurant': {
-            'name': 'Sample Restaurant',
-            'tagline': 'Delicious Food & Drinks',
-            'image': None
-        },
-        'sections': [
-            {
-                'name': 'Appetizers',
-                'items': [
-                    {
-                        'name': 'Sample Item 1',
-                        'description': 'A delicious sample item',
-                        'price': '9.99',
-                        'photo': None
-                    },
-                    {
-                        'name': 'Sample Item 2',
-                        'description': 'Another tasty option',
-                        'price': '12.99',
-                        'photo': None
-                    }
-                ]
-            },
-            {
-                'name': 'Main Courses',
-                'items': [
-                    {
-                        'name': 'Sample Main 1',
-                        'description': 'A hearty main course',
-                        'price': '19.99',
-                        'photo': None
-                    },
-                    {
-                        'name': 'Sample Main 2',
-                        'description': 'Another satisfying option',
-                        'price': '22.99',
-                        'photo': None
-                    }
-                ]
+    if menu_id:
+        # Get actual menu data
+        menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+        menu = {
+            'restaurant': menu_link.restaurant,
+            'sections': []
+        }
+        
+        # Add sections and their items
+        for section in menu_link.sections.all().order_by('name'):
+            section_data = {
+                'name': section.name,
+                'items': []
             }
-        ]
-    }
+            # Use the reverse relationship to get items
+            for item in MenuItem.objects.filter(menu=menu_link, section=section).order_by('name'):
+                section_data['items'].append({
+                    'name': item.name,
+                    'description': item.description,
+                    'price': item.price,
+                    'photo': item.photo
+                })
+            menu['sections'].append(section_data)
+    else:
+        # Use sample data if no menu_id provided
+        menu = {
+            'restaurant': {
+                'name': 'Sample Restaurant',
+                'tagline': 'Delicious Food & Drinks',
+                'image': None
+            },
+            'sections': [
+                {
+                    'name': 'Appetizers',
+                    'items': [
+                        {
+                            'name': 'Sample Item 1',
+                            'description': 'A delicious sample item',
+                            'price': '9.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Sample Item 2',
+                            'description': 'Another tasty option',
+                            'price': '12.99',
+                            'photo': None
+                        }
+                    ]
+                },
+                {
+                    'name': 'Main Courses',
+                    'items': [
+                        {
+                            'name': 'Sample Main 1',
+                            'description': 'A hearty main course',
+                            'price': '19.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Sample Main 2',
+                            'description': 'Another satisfying option',
+                            'price': '22.99',
+                            'photo': None
+                        }
+                    ]
+                }
+            ]
+        }
     
     # Get the template content
     template_path = os.path.join(settings.BASE_DIR, 'menu', 'templates', 'menu', 'templates', template.template_file)
