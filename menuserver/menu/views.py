@@ -491,7 +491,18 @@ def template_preview(request, template_id):
         ]
     }
     
-    return render(request, f'menu/templates/{template.template_file}', {
+    # Get the template content
+    template_path = os.path.join(settings.BASE_DIR, 'menu', 'templates', 'menu', 'templates', template.template_file)
+    with open(template_path, 'r') as f:
+        template_content = f.read()
+    
+    # Create response with appropriate headers
+    response = render(request, f'menu/templates/{template.template_file}', {
         'menu': menu,
         'is_preview': True
     })
+    
+    # Allow the page to be displayed in an iframe
+    response['X-Frame-Options'] = 'SAMEORIGIN'
+    
+    return response

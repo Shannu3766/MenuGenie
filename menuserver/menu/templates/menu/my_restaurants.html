@@ -124,8 +124,14 @@
                                             <div class="preview-container">
                                                 {% for template in templates %}
                                                 <div id="preview-{{ template.id }}" class="template-preview {% if link.template.id == template.id %}active{% endif %}">
-                                                    <iframe src="{% url 'menu:template_preview' template.id %}?menu_id={{ link.id }}" 
-                                                            style="width: 100%; height: 500px; border: none; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></iframe>
+                                                    <div class="preview-loading">
+                                                        <div class="spinner-border text-primary" role="status">
+                                                            <span class="visually-hidden">Loading...</span>
+                                                        </div>
+                                                    </div>
+                                                    <iframe src="{{ request.scheme }}://{{ request.get_host }}{% url 'menu:template_preview' template.id %}?menu_id={{ link.id }}" 
+                                                            style="width: 100%; height: 500px; border: none; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+                                                            onload="this.parentElement.classList.add('loaded')"></iframe>
                                                 </div>
                                                 {% endfor %}
                                             </div>
@@ -305,41 +311,60 @@
     }
 
     /* Template Selection Styles */
+    .template-preview {
+        display: none;
+        position: relative;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .template-preview.active {
+        display: block;
+        opacity: 1;
+    }
+    
+    .preview-loading {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 8px;
+        z-index: 1;
+        transition: opacity 0.3s ease;
+    }
+    
+    .template-preview.loaded .preview-loading {
+        opacity: 0;
+        pointer-events: none;
+    }
+    
     .template-option {
-        transition: all 0.3s ease;
         cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
     }
     
     .template-option:hover {
-        background-color: #f1f5f9;
+        background-color: #f8fafc;
         transform: translateX(5px);
     }
     
     .template-option.active {
         background-color: #f0f9ff;
-        border: 1px solid #0ea5e9;
+        border-color: #0ea5e9;
     }
     
-    .template-preview {
-        display: none;
+    .template-option.active .template-name {
+        color: #0ea5e9;
     }
     
-    .template-preview.active {
-        display: block;
-    }
-    
-    .preview-card {
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        overflow: hidden;
-    }
-    
-    .menu-item {
-        transition: all 0.3s ease;
-    }
-    
-    .menu-item:hover {
-        transform: translateX(5px);
+    .template-option.active .template-description {
+        color: #0369a1;
     }
 </style>
 
@@ -384,8 +409,23 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update preview
             this.closest('.modal').querySelectorAll('.template-preview').forEach(preview => {
                 preview.classList.remove('active');
+                preview.classList.remove('loaded');
             });
-            document.getElementById(previewId).classList.add('active');
+            
+            const previewElement = document.getElementById(previewId);
+            previewElement.classList.add('active');
+            
+            // Update iframe src to show new template preview
+            const previewFrame = previewElement.querySelector('iframe');
+            const currentUrl = window.location.origin;
+            previewFrame.src = `${currentUrl}/menu/template/${template}/preview/?menu_id=${linkId}`;
+        });
+    });
+
+    // Handle iframe loading
+    document.querySelectorAll('.template-preview iframe').forEach(iframe => {
+        iframe.addEventListener('load', function() {
+            this.parentElement.classList.add('loaded');
         });
     });
 });
