@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import IntegrityError
 from django.http import JsonResponse
-from .models import MenuLink, MenuItem, MenuSection, Restaurant
+from .models import MenuLink, MenuItem, MenuSection, Restaurant, MenuTemplate
 from .forms import MenuItemForm, MenuSectionForm, MenuUploadForm
 from .utils import extract_menu_data
 import os
@@ -399,3 +399,27 @@ def edit_restaurant(request, menu_id):
         return redirect('menu:my_restaurants')
     
     return render(request, 'menu/edit_restaurant.html', {'menu_link': menu_link})
+
+@login_required
+def change_template(request, menu_id):
+    if request.method == 'POST':
+        menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+        template_id = request.POST.get('template')
+        template = get_object_or_404(MenuTemplate, id=template_id)
+        menu_link.template = template
+        menu_link.save()
+        messages.success(request, 'Template updated successfully!')
+        return redirect('menu:my_restaurants')
+    return redirect('menu:my_restaurants')
+
+@login_required
+def template_preview(request, template_id):
+    template = get_object_or_404(MenuTemplate, id=template_id)
+    menu_id = request.GET.get('menu_id')
+    menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+    
+    # Render the template preview with the menu data
+    return render(request, f'menu/templates/{template.template_file}', {
+        'menu_link': menu_link,
+        'preview_mode': True
+    })
