@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if is_change %}Change Template{% else %}Select Template{% endif %} - {{ menu_link.restaurant.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4 fw-bold" style="color: #1e293b;">
+                        {% if is_change %}
+                            Change Menu Template
+                        {% else %}
+                            Step 2: Choose Your Menu Template
+                        {% endif %}
+                    </h2>
+                    
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" action="{% url 'menu:change_template' menu_link.restaurant.id %}">
+                        {% csrf_token %}
+                        <div class="template-options">
+                            {% for template in templates %}
+                            <div class="template-option mb-3">
+                                <input type="radio" class="btn-check" name="template_id" id="template{{ template.id }}" value="{{ template.id }}" 
+                                       {% if menu_link.template.id == template.id %}checked{% endif %}>
+                                <label class="btn btn-outline-primary w-100" for="template{{ template.id }}">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-palette fa-2x me-3"></i>
+                                        <div class="text-start">
+                                            <h6 class="mb-1">{{ template.name }}</h6>
+                                            <small class="text-muted">{{ template.description }}</small>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary rounded-pill">
+                                <i class="fas fa-save me-2"></i>{% if is_change %}Update Template{% else %}Select Template{% endif %}
+                            </button>
+                            <a href="{% url 'menu:my_restaurants' %}" class="btn btn-light rounded-pill">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .template-option .btn {
+        text-align: left;
+        padding: 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .template-option .btn:hover {
+        transform: translateX(5px);
+    }
+    
+    .template-option .btn-check:checked + .btn {
+        background-color: #0ea5e9;
+        border-color: #0ea5e9;
+        color: white;
+    }
+    
+    .template-option .btn-check:checked + .btn i,
+    .template-option .btn-check:checked + .btn small {
+        color: white !important;
+    }
+    
+    .preview-frame-container {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const templateInputs = document.querySelectorAll('input[name="template_id"]');
+    const previewFrame = document.getElementById('previewFrame');
+    
+    function updatePreview(templateId) {
+        previewFrame.src = `/menu/template-preview/${templateId}/?menu_id={{ menu_link.id }}`;
+    }
+    
+    // Set initial preview
+    const checkedTemplate = document.querySelector('input[name="template_id"]:checked');
+    if (checkedTemplate) {
+        updatePreview(checkedTemplate.value);
+    }
+    
+    // Update preview when template is selected
+    templateInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            updatePreview(this.value);
+        });
+    });
+});
+</script>
+{% endblock %} 

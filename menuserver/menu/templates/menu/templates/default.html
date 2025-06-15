@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ menu.restaurant.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Restaurant Header -->
+            <div class="text-center mb-5">
+                {% if menu.restaurant.image %}
+                    <img src="{{ menu.restaurant.image.url }}" alt="{{ menu.restaurant.name }}" 
+                         class="img-fluid rounded-3 mb-4" style="max-height: 300px; width: 100%; object-fit: cover;">
+                {% endif %}
+                <h1 class="display-4 fw-bold mb-2">{{ menu.restaurant.name }}</h1>
+                {% if menu.restaurant.tagline %}
+                    <p class="lead text-muted">{{ menu.restaurant.tagline }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Menu Sections -->
+            {% for section in menu.sections %}
+                <div class="menu-section mb-5">
+                    <h2 class="h3 fw-bold mb-4">{{ section.name }}</h2>
+                    <div class="row g-4">
+                        {% for item in section.items %}
+                            <div class="col-md-6">
+                                <div class="menu-item card h-100 border-0 shadow-sm">
+                                    {% if item.photo %}
+                                        <img src="{{ item.photo.url }}" alt="{{ item.name }}" 
+                                             class="card-img-top" style="height: 200px; object-fit: cover;">
+                                    {% endif %}
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h5 class="card-title fw-bold mb-0">{{ item.name }}</h5>
+                                            <span class="text-primary fw-bold">${{ item.price }}</span>
+                                        </div>
+                                        {% if item.description %}
+                                            <p class="card-text text-muted">{{ item.description }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+.menu-item {
+    transition: transform 0.3s ease;
+}
+
+.menu-item:hover {
+    transform: translateY(-5px);
+}
+
+.card {
+    border-radius: 15px;
+}
+
+.card-img-top {
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+</style>
+{% endblock %} 

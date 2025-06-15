@@ -3,6 +3,7 @@ import os
 import json
 from PIL import Image
 from django.conf import settings
+from .models import MenuTemplate
 
 def extract_menu_data(image_path):
     try:
@@ -99,3 +100,51 @@ def extract_menu_data(image_path):
     except Exception as e:
         print(f"Unexpected error in extract_menu_data: {str(e)}")
         return None 
+
+def get_available_templates():
+    """
+    Automatically detect available menu templates from the templates directory.
+    Returns a list of template information dictionaries.
+    """
+    template_dir = os.path.join(settings.BASE_DIR, 'menu', 'templates', 'menu', 'templates')
+    templates = []
+    
+    if not os.path.exists(template_dir):
+        os.makedirs(template_dir)
+    
+    for template_name in os.listdir(template_dir):
+        if template_name.endswith('.html'):
+            template_path = os.path.join(template_dir, template_name)
+            if os.path.isfile(template_path):
+                template_base_name = os.path.splitext(template_name)[0]
+                templates.append({
+                    'name': template_base_name.replace('_', ' ').title(),
+                    'template_file': f'templates/{template_name}',
+                    'description': f'Template for {template_base_name.replace("_", " ").title()}'
+                })
+    
+    return templates
+
+def sync_templates():
+    """
+    Synchronize available templates with the database.
+    Creates new template entries for newly detected templates.
+    """
+    available_templates = get_available_templates()
+    existing_templates = MenuTemplate.objects.all()
+    
+    # Create new templates
+    for template_info in available_templates:
+        MenuTemplate.objects.get_or_create(
+            template_file=template_info['template_file'],
+            defaults={
+                'name': template_info['name'],
+                'description': template_info['description']
+            }
+        )
+    
+    # Mark templates as inactive if they no longer exist
+    for template in existing_templates:
+        if not any(t['template_file'] == template.template_file for t in available_templates):
+            template.is_active = False
+            template.save() 

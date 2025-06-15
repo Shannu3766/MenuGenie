@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ menu.restaurant.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Hero Section -->
+    <div class="hero-section position-relative" style="height: 60vh; min-height: 400px;">
+        {% if menu.restaurant.image %}
+            <div class="position-absolute w-100 h-100" style="background: url('{{ menu.restaurant.image.url }}') center/cover no-repeat; filter: brightness(0.7);"></div>
+        {% else %}
+            <div class="position-absolute w-100 h-100 bg-dark"></div>
+        {% endif %}
+        <div class="position-relative h-100 d-flex align-items-center justify-content-center text-white text-center">
+            <div class="container">
+                <h1 class="display-3 fw-bold mb-3">{{ menu.restaurant.name }}</h1>
+                {% if menu.restaurant.tagline %}
+                    <p class="lead">{{ menu.restaurant.tagline }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Content -->
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                {% for section in menu.sections %}
+                    <div class="menu-section mb-5">
+                        <h2 class="h2 fw-bold mb-4 text-center">{{ section.name }}</h2>
+                        <div class="row g-4">
+                            {% for item in section.items %}
+                                <div class="col-md-6">
+                                    <div class="menu-item d-flex align-items-start p-3 rounded-3" style="background: #f8fafc;">
+                                        {% if item.photo %}
+                                            <img src="{{ item.photo.url }}" alt="{{ item.name }}" 
+                                                 class="rounded-3 me-3" style="width: 100px; height: 100px; object-fit: cover;">
+                                        {% endif %}
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="fw-bold mb-0">{{ item.name }}</h5>
+                                                <span class="text-primary fw-bold ms-3">${{ item.price }}</span>
+                                            </div>
+                                            {% if item.description %}
+                                                <p class="text-muted mb-0 small">{{ item.description }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.menu-item {
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.menu-item:hover {
+    transform: translateY(-3px);
+    border-color: #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.hero-section {
+    background-color: #1e293b;
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        height: 40vh;
+    }
+}
+</style>
+{% endblock %} 

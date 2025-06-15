@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Welcome to MenuGenie{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h1 class="display-4 mb-4">Welcome to Menu<span class="gradient-text">Genie</span></h1>
+            <p class="lead mb-5">Create and manage your restaurant's digital menu with ease.</p>
+            
+            {% if user.is_authenticated %}
+                <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                    <a href="{% url 'menu:my_restaurants' %}" class="btn btn-primary btn-lg px-4 gap-3">
+                        <i class="fas fa-utensils me-2"></i>My Restaurants
+                    </a>
+                    <a href="{% url 'menu:create_restaurant' %}" class="btn btn-outline-primary btn-lg px-4">
+                        <i class="fas fa-plus me-2"></i>Create New Restaurant
+                    </a>
+                </div>
+            {% else %}
+                <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                    <a href="{% url 'login' %}" class="btn btn-primary btn-lg px-4 gap-3">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login
+                    </a>
+                    <a href="{% url 'register' %}" class="btn btn-outline-primary btn-lg px-4">
+                        <i class="fas fa-user-plus me-2"></i>Register
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

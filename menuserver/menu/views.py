@@ -2,10 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import IntegrityError
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from .models import MenuLink, MenuItem, MenuSection, Restaurant, MenuTemplate
 from .forms import MenuItemForm, MenuSectionForm, MenuUploadForm
-from .utils import extract_menu_data
+from .utils import extract_menu_data, sync_templates
 import os
 from django.conf import settings
 import json
@@ -16,50 +16,51 @@ from django.utils.text import slugify
 
 @login_required
 def my_restaurants(request):
-    menu_links = MenuLink.objects.filter(user=request.user).select_related('restaurant').order_by('-created_at')
+    """
+    Display user's restaurants with template selection functionality
+    """
+    menu_links = MenuLink.objects.filter(user=request.user).select_related('restaurant', 'template')
+    templates = MenuTemplate.objects.filter(is_active=True)
+    
     return render(request, 'menu/my_restaurants.html', {
-        'menu_links': menu_links
+        'menu_links': menu_links,
+        'templates': templates
     })
 
 @login_required
 def create_restaurant(request):
+    """
+    Create a new restaurant with template selection
+    """
     if request.method == 'POST':
-        restaurant_name = request.POST.get('restaurant_name')
-        restaurant_tagline = request.POST.get('restaurant_tagline')
-        restaurant_image = request.FILES.get('restaurant_image')
+        # Existing restaurant creation logic
+        name = request.POST.get('name')
+        tagline = request.POST.get('tagline')
+        image = request.FILES.get('image')
+        template_id = request.POST.get('template')
         
-        if not restaurant_name:
-            messages.error(request, 'Restaurant name is required.')
-            return render(request, 'menu/create_restaurant.html', {
-                'restaurant_name': restaurant_name,
-                'restaurant_tagline': restaurant_tagline
-            })
-        
-        # Check if restaurant name already exists
-        if Restaurant.objects.filter(name=restaurant_name).exists():
-            messages.error(request, 'A restaurant with this name already exists.')
-            return render(request, 'menu/create_restaurant.html', {
-                'restaurant_name': restaurant_name,
-                'restaurant_tagline': restaurant_tagline
-            })
-        
-        # Create restaurant
         restaurant = Restaurant.objects.create(
-            name=restaurant_name,
-            tagline=restaurant_tagline,
-            image=restaurant_image,
+            name=name,
+            tagline=tagline,
+            image=image,
             user=request.user
         )
         
-        # Create menu link
-        menu_link = MenuLink.objects.create(
+        template = get_object_or_404(MenuTemplate, id=template_id) if template_id else None
+        
+        MenuLink.objects.create(
             user=request.user,
-            restaurant=restaurant
+            restaurant=restaurant,
+            template=template
         )
         
-        return redirect('menu:manage_menu', menu_id=menu_link.id)
+        return redirect('menu:my_restaurants')
     
-    return render(request, 'menu/create_restaurant.html')
+    # Get available templates
+    templates = MenuTemplate.objects.filter(is_active=True)
+    return render(request, 'menu/create_restaurant.html', {
+        'templates': templates
+    })
 
 @login_required
 def import_restaurant(request):
@@ -287,34 +288,42 @@ def edit_menu_item(request, menu_id, item_id):
     })
 
 def public_menu(request, user_id, restaurant_name):
-    """Public view of a restaurant's menu"""
-    # Convert the restaurant name from slug to title case for comparison
-    restaurant_name_title = restaurant_name.replace('-', ' ').title()
-    
-    # Try to find the restaurant with case-insensitive name comparison
-    menu_link = get_object_or_404(
-        MenuLink,
+    # First try exact match
+    menu_link = MenuLink.objects.select_related('restaurant', 'template').filter(
         user_id=user_id,
-        restaurant__name__iexact=restaurant_name_title
-    )
+        restaurant__name__iexact=restaurant_name
+    ).first()
     
-    # Get all sections ordered by name
-    sections = menu_link.sections.all().order_by('name')
+    # If not found, try matching the slugified version
+    if not menu_link:
+        from django.utils.text import slugify
+        menu_link = MenuLink.objects.select_related('restaurant', 'template').filter(
+            user_id=user_id
+        ).first()
+        if menu_link and slugify(menu_link.restaurant.name) == restaurant_name:
+            pass  # We found a match
+        else:
+            menu_link = None
     
-    # Get all items that belong to sections
-    sectioned_items = menu_link.items.filter(section__isnull=False).order_by('section__name', 'name')
+    if not menu_link:
+        raise Http404("No MenuLink matches the given query.")
     
-    # Get all items that don't belong to any section
-    unsectioned_items = menu_link.items.filter(section__isnull=True).order_by('name')
+    restaurant = menu_link.restaurant
     
-    context = {
+    # Get the template from the database
+    template = menu_link.template
+    
+    # Prepare menu data
+    menu_data = {
+        'restaurant': restaurant,
         'menu_link': menu_link,
-        'sections': sections,
-        'sectioned_items': sectioned_items,
-        'unsectioned_items': unsectioned_items,
+        'sections': menu_link.sections.all().order_by('name'),
+        'items': MenuItem.objects.filter(menu=menu_link).order_by('section__name', 'name'),
+        'template': template,
     }
     
-    return render(request, 'menu/public_menu.html', context)
+    # Render using the template from the templates subdirectory
+    return render(request, f'menu/templates/{template.template_file}', menu_data)
 
 @login_required
 def delete_section(request, menu_id, section_id):
@@ -402,24 +411,62 @@ def edit_restaurant(request, menu_id):
 
 @login_required
 def change_template(request, menu_id):
+    """
+    Change the template for an existing menu
+    """
     if request.method == 'POST':
         menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
         template_id = request.POST.get('template')
-        template = get_object_or_404(MenuTemplate, id=template_id)
-        menu_link.template = template
-        menu_link.save()
-        messages.success(request, 'Template updated successfully!')
-        return redirect('menu:my_restaurants')
-    return redirect('menu:my_restaurants')
+        
+        if template_id:
+            template = get_object_or_404(MenuTemplate, id=template_id)
+            menu_link.template = template
+            menu_link.save()
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Template updated successfully'
+            })
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request'
+    }, status=400)
 
 @login_required
 def template_preview(request, template_id):
+    """
+    Preview a menu template with sample data
+    """
     template = get_object_or_404(MenuTemplate, id=template_id)
-    menu_id = request.GET.get('menu_id')
-    menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+    sample_menu = {
+        'restaurant': {
+            'name': 'Sample Restaurant',
+            'tagline': 'Delicious Food & Drinks',
+            'image': None
+        },
+        'sections': [
+            {
+                'name': 'Appetizers',
+                'items': [
+                    {
+                        'name': 'Sample Item 1',
+                        'description': 'A delicious sample item',
+                        'price': '9.99',
+                        'photo': None
+                    },
+                    {
+                        'name': 'Sample Item 2',
+                        'description': 'Another tasty option',
+                        'price': '12.99',
+                        'photo': None
+                    }
+                ]
+            }
+        ]
+    }
     
-    # Render the template preview with the menu data
-    return render(request, f'menu/templates/{template.template_file}', {
-        'menu_link': menu_link,
-        'preview_mode': True
+    return render(request, template.template_file, {
+        'menu': sample_menu,
+        'is_preview': True
     })
