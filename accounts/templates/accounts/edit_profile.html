@@ -1,94 +1,286 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Edit Profile{% endblock %}
+{% block title %}Edit Profile - {{ user.username }}{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="text-center mb-0">Edit Profile</h2>
-                </div>
-                <div class="card-body">
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-
-                    <form method="post" class="needs-validation" novalidate>
-                        {% csrf_token %}
-                        
-                        {% for field in form %}
-                            {% if field.name != 'is_restaurant_owner' %}
-                                <div class="mb-3">
-                                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                                    {{ field.errors }}
-                                    {{ field }}
-                                    {% if field.help_text %}
-                                        <div class="form-text">{{ field.help_text }}</div>
-                                    {% endif %}
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-
-                        <div class="mb-3 form-check">
-                            {{ form.is_restaurant_owner }}
-                            <label class="form-check-label" for="{{ form.is_restaurant_owner.id_for_label }}">
-                                {{ form.is_restaurant_owner.label }}
-                            </label>
-                            {% if form.is_restaurant_owner.help_text %}
-                                <div class="form-text">{{ form.is_restaurant_owner.help_text }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Save Changes</button>
-                            <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary">Cancel</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
-    .card {
-        border: none;
-        border-radius: 10px;
-    }
-    .form-control {
-        border-radius: 5px;
-    }
-    .form-control:read-only {
+    body {
+        font-family: 'Montserrat', sans-serif;
         background-color: #f8f9fa;
     }
-    .btn-primary {
-        padding: 0.8rem;
+
+    .edit-profile-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     }
-    .form-check {
-        padding-left: 1.8rem;
+
+    .edit-profile-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        position: relative;
     }
-    .form-check-input {
-        margin-left: -1.8rem;
+
+    .edit-profile-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        color: #1a1a1a;
+        margin-bottom: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #1e293b;
+        font-weight: 500;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #0ea5e9;
+        box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+        outline: none;
+    }
+
+    .btn-save {
+        background-color: #0ea5e9;
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    .btn-save:hover {
+        background-color: #0284c7;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(14, 165, 233, 0.2);
+    }
+
+    .btn-cancel {
+        background-color: #f1f5f9;
+        color: #64748b;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 1rem;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-cancel:hover {
+        background-color: #e2e8f0;
+        color: #1e293b;
+    }
+
+    .form-section {
+        background-color: #f8fafc;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .form-section-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        color: #1a1a1a;
+        margin-bottom: 1.5rem;
+    }
+
+    .toggle-section {
+        background-color: #f8fafc;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+    }
+
+    .toggle-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .toggle-label {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-weight: 500;
+        color: #1e293b;
+    }
+
+    .toggle-icon {
+        width: 40px;
+        height: 40px;
+        background-color: #e0f2fe;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0ea5e9;
+        font-size: 1.2rem;
+    }
+
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #e2e8f0;
+        transition: .4s;
+        border-radius: 34px;
+    }
+
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+        background-color: #0ea5e9;
+    }
+
+    input:checked + .toggle-slider:before {
+        transform: translateX(26px);
+    }
+
+    .toggle-description {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: #64748b;
+        padding-left: 3.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .edit-profile-container {
+            margin: 1rem;
+            padding: 1.5rem;
+        }
+
+        .edit-profile-title {
+            font-size: 2rem;
+        }
+
+        .form-section {
+            padding: 1.5rem;
+        }
     }
 </style>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    form.addEventListener('submit', function(event) {
-        if (!form.checkValidity()) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
-        form.classList.add('was-validated');
-    });
-});
-</script>
+<div class="edit-profile-container">
+    <div class="edit-profile-header">
+        <h1 class="edit-profile-title">Edit Profile</h1>
+    </div>
+
+    <form method="post" class="edit-profile-form">
+        {% csrf_token %}
+        
+        <div class="form-section">
+            <h2 class="form-section-title">Personal Information</h2>
+            
+            <div class="form-group">
+                <label for="id_username" class="form-label">Username</label>
+                <input type="text" name="username" id="id_username" class="form-control" value="{{ user.username }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="id_email" class="form-label">Email</label>
+                <input type="email" name="email" id="id_email" class="form-control" value="{{ user.email }}" required>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2 class="form-section-title">Contact Information</h2>
+            
+            <div class="form-group">
+                <label for="id_phone_number" class="form-label">Phone Number</label>
+                <input type="tel" name="phone_number" id="id_phone_number" class="form-control" value="{{ user.phone_number|default:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="id_address" class="form-label">Address</label>
+                <textarea name="address" id="id_address" class="form-control" rows="3">{{ user.address|default:'' }}</textarea>
+            </div>
+        </div>
+
+        <div class="toggle-section">
+            <h2 class="form-section-title">Account Type</h2>
+            
+            <div class="toggle-container">
+                <div class="toggle-label">
+                    <div class="toggle-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <span>Restaurant Owner</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" name="is_restaurant_owner" id="id_is_restaurant_owner" {% if user.is_restaurant_owner %}checked{% endif %}>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <p class="toggle-description">
+                Enable this option if you own a restaurant and want to manage your menu through MenuGenie.
+            </p>
+        </div>
+
+        <button type="submit" class="btn-save">
+            <i class="fas fa-save me-2"></i>Save Changes
+        </button>
+        
+        <a href="{% url 'accounts:profile' %}" class="btn-cancel">
+            <i class="fas fa-times me-2"></i>Cancel
+        </a>
+    </form>
+</div>
 {% endblock %} 
