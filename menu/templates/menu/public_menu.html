@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ menu_link.restaurant.name }} - Menu{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Restaurant Header -->
+            <div class="text-center mb-5">
+                {% if menu_link.restaurant.image %}
+                <img src="{{ menu_link.restaurant.image.url }}" alt="{{ menu_link.restaurant.name }}" class="img-fluid rounded-circle mb-3" style="max-width: 200px; height: 200px; object-fit: cover;">
+                {% endif %}
+                <h1 class="display-4 mb-2">{{ menu_link.restaurant.name }}</h1>
+                {% if menu_link.restaurant.tagline %}
+                <p class="lead text-muted">{{ menu_link.restaurant.tagline }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Menu Sections -->
+            {% for section in sections %}
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">{{ section.name }}</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for item in sectioned_items %}
+                        {% if item.section == section %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                {% if item.photo %}
+                                <img src="{{ item.photo.url }}" class="card-img-top" alt="{{ item.name }}" style="height: 200px; object-fit: cover;">
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ item.name }}</h5>
+                                    {% if item.description %}
+                                    <p class="card-text text-muted">{{ item.description }}</p>
+                                    {% endif %}
+                                    <p class="card-text">
+                                        <strong class="text-primary">₹{{ item.price }}</strong>
+                                        {% if item.quantity > 1 %}
+                                        <small class="text-muted">({{ item.quantity }} items)</small>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Unsectioned Items -->
+            {% if unsectioned_items %}
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">Other Items</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for item in unsectioned_items %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                {% if item.photo %}
+                                <img src="{{ item.photo.url }}" class="card-img-top" alt="{{ item.name }}" style="height: 200px; object-fit: cover;">
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ item.name }}</h5>
+                                    {% if item.description %}
+                                    <p class="card-text text-muted">{{ item.description }}</p>
+                                    {% endif %}
+                                    <p class="card-text">
+                                        <strong class="text-primary">₹{{ item.price }}</strong>
+                                        {% if item.quantity > 1 %}
+                                        <small class="text-muted">({{ item.quantity }} items)</small>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-img-top {
+    border-top-left-radius: calc(0.25rem - 1px);
+    border-top-right-radius: calc(0.25rem - 1px);
+}
+
+.text-primary {
+    color: #007bff !important;
+}
+
+.bg-primary {
+    background-color: #007bff !important;
+}
+</style>
+{% endblock %} 

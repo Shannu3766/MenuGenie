@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ menu.restaurant.name }} - Menu{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    body {
+        font-family: 'Cormorant Garamond', serif;
+        background-color: #f8f9fa;
+        color: #1a1a1a;
+        line-height: 1.6;
+    }
+
+    .menu-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        background-color: white;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .hero-banner {
+        height: 400px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        margin-bottom: 3rem;
+    }
+
+    .hero-banner::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 100px;
+        background: linear-gradient(to top, rgba(255,255,255,1), rgba(255,255,255,0));
+    }
+
+    .restaurant-header {
+        text-align: center;
+        margin-bottom: 4rem;
+        position: relative;
+    }
+
+    .restaurant-name {
+        font-family: 'Playfair Display', serif;
+        font-size: 3.5rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 1rem;
+        letter-spacing: 2px;
+    }
+
+    .restaurant-description {
+        font-size: 1.2rem;
+        color: #666;
+        font-style: italic;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .section-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 2rem;
+        text-align: center;
+        margin: 3rem 0 2rem;
+        position: relative;
+        padding-bottom: 1rem;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 2px;
+        background: linear-gradient(to right, transparent, #d4af37, transparent);
+    }
+
+    .menu-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 1.5rem 0;
+        border-bottom: 1px solid #eee;
+        transition: all 0.3s ease;
+    }
+
+    .menu-item:hover {
+        transform: translateX(10px);
+    }
+
+    .item-info {
+        flex: 1;
+        padding-right: 2rem;
+    }
+
+    .item-name {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 0.5rem;
+    }
+
+    .item-description {
+        font-size: 1.1rem;
+        color: #666;
+        font-style: italic;
+    }
+
+    .item-price {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.3rem;
+        color: #d4af37;
+        font-weight: 600;
+    }
+
+    .footer {
+        text-align: center;
+        margin-top: 4rem;
+        padding-top: 2rem;
+        border-top: 1px solid #eee;
+    }
+
+    .social-links {
+        margin: 1rem 0;
+    }
+
+    .social-links a {
+        color: #1a1a1a;
+        margin: 0 1rem;
+        font-size: 1.2rem;
+        transition: color 0.3s ease;
+    }
+
+    .social-links a:hover {
+        color: #d4af37;
+    }
+
+    .contact-info {
+        font-size: 1.1rem;
+        color: #666;
+        margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .restaurant-name {
+            font-size: 2.5rem;
+        }
+        
+        .hero-banner {
+            height: 300px;
+        }
+        
+        .menu-item {
+            flex-direction: column;
+        }
+        
+        .item-price {
+            margin-top: 0.5rem;
+        }
+    }
+
+    .restaurant-hero {
+        background-image: url("{% if menu.restaurant.image and menu.restaurant.image.url %}{{ menu.restaurant.image.url }}{% else %}https://images.unsplash.com/photo-1517248135467-4bab7a1e0ab7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80{% endif %}");
+    }
+</style>
+
+<div class="menu-container">
+    <!-- Hero Banner -->
+    {% if menu.restaurant.image and menu.restaurant.image.url %}
+    <div class="hero-banner restaurant-hero"></div>
+    {% endif %}
+
+    <!-- Restaurant Header -->
+    <div class="restaurant-header">
+        <h1 class="restaurant-name">{{ menu.restaurant.name }}</h1>
+        {% if menu.restaurant.tagline %}
+            <p class="restaurant-description">{{ menu.restaurant.tagline }}</p>
+        {% endif %}
+    </div>
+
+    <!-- Menu Sections -->
+    {% for section in menu.sections %}
+        <h2 class="section-title">{{ section.name }}</h2>
+        {% if section.description %}
+            <p class="text-center text-gray-600 mb-8">{{ section.description }}</p>
+        {% endif %}
+
+        <div class="menu-items">
+            {% for item in section.items %}
+                <div class="menu-item">
+                    <div class="item-info">
+                        <h3 class="item-name">{{ item.name }}</h3>
+                        {% if item.description %}
+                            <p class="item-description">{{ item.description }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="item-price">{{ item.price }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="social-links">
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-facebook"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+        </div>
+        <div class="contact-info">
+            <p>123 Restaurant Street, City, Country</p>
+            <p>Phone: (123) 456-7890</p>
+            <p>Email: info@restaurant.com</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

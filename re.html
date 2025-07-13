@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MenuGenie - Restaurant Menu Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --secondary: #8b5cf6;
+            --accent: #f59e0b;
+            --text: #1f2937;
+            --light-bg: #f8fafc;
+            --dark-bg: #0f172a;
+        }
+        
+        .dark {
+            --text: #f8fafc;
+            --light-bg: #0f172a;
+            --dark-bg: #1e293b;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--text);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+        
+        .dark .gradient-bg {
+            background: linear-gradient(135deg, #0c4a6e, #4c1d95);
+        }
+        
+        .navbar {
+            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        .dark .navbar {
+            background: rgba(15, 23, 42, 0.8);
+        }
+        
+        .card-hover-effect {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card-hover-effect:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.5s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Navbar -->
+    <nav class="navbar sticky top-0 z-50 shadow-sm">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <a href="#" class="flex items-center space-x-2">
+                    <div class="w-10 h-10 rounded-full gradient-bg flex items-center justify-center">
+                        <i class="fas fa-utensils text-white"></i>
+                    </div>
+                    <span class="text-xl font-semibold">Menu<span class="gradient-text">Genie</span></span>
+                </a>
+                
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#" class="nav-link hover:text-primary transition-colors duration-300">Features</a>
+                    <a href="#" class="nav-link hover:text-primary transition-colors duration-300">Pricing</a>
+                    <a href="#" class="nav-link hover:text-primary transition-colors duration-300">Templates</a>
+                    <a href="#" class="nav-link hover:text-primary transition-colors duration-300">About</a>
+                    
+                    <div class="flex items-center space-x-4 ml-4">
+                        <a href="#" class="px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                        <a href="#" class="px-4 py-2 rounded-lg gradient-bg text-white hover:opacity-90 transition-opacity duration-300">
+                            <i class="fas fa-user-plus"></i> Register
+                        </a>
+                        <button id="theme-toggle" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300">
+                            <i class="fas fa-moon dark:hidden"></i>
+                            <i class="fas fa-sun hidden dark:block"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <button id="mobile-menu-button" class="md:hidden w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="hidden md:hidden mt-4 pb-4">
+                <div class="flex flex-col space-y-3">
+                    <a href="#" class="px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300">Features</a>
+                    <a href="#" class="px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300">Pricing</a>
+                    <a href="#" class="px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300">Templates</a>
+                    <a href="#" class="px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300">About</a>
+                    
+                    <div class="flex flex-col space-y-3 pt-2">
+                        <a href="#" class="px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-300 text-center">
+                            <i class="fas fa-sign-in-alt mr-2"></i> Login
+                        </a>
+                        <a href="#" class="px-4 py-2 rounded-lg gradient-bg text-white hover:opacity-90 transition-opacity duration-300 text-center">
+                            <i class="fas fa-user-plus mr-2"></i> Register
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="py-20">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-10 md:mb-0 animate-fade-in">
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+                        Transform Your <span class="gradient-text">Restaurant's</span> Digital Presence
+                    </h1>
+                    <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">
+                        Create beautiful, interactive menus that wow your customers and boost your sales with our intuitive platform.
+                    </p>
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <a href="#" class="px-6 py-3 rounded-lg gradient-bg text-white font-medium hover:opacity-90 transition-opacity duration-300 text-center">
+                            <i class="fas fa-play mr-2"></i> Watch Demo
+                        </a>
+                        <a href="#" class="px-6 py-3 rounded-lg border border-gray-300 dark:border-gray-600 font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-300 text-center">
+                            <i class="fas fa-book-open mr-2"></i> Learn More
+                        </a>
+                    </div>
+                </div>
+                <div class="md:w-1/2 animate-fade-in">
+                    <div class="relative">
+                        <div class="w-full h-96 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-3xl shadow-xl overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                                 alt="Restaurant interior" 
+                                 class="w-full h-full object-cover opacity-90">
+                        </div>
+                        <div class="absolute -bottom-6 -right-6 w-48 h-48 bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 animate-fade-in-up">
+                            <div class="w-full h-full bg-gradient-to-br from-yellow-100 to-orange-100 dark:from-yellow-800 dark:to-orange-800 rounded-xl flex items-center justify-center">
+                                <div class="text-center p-4">
+                                    <div class="text-3xl font-bold gradient-text">25%</div>
+                                    <div class="text-sm font-medium">Increase in Sales</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-16 bg-gray-50 dark:bg-gray-900">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16 animate-fade-in">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Powerful Features for Your Restaurant</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                    Everything you need to create, manage, and optimize your digital menus
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md card-hover-effect animate-fade-in-up">
+                    <div class="w-14 h-14 rounded-xl gradient-bg flex items-center justify-center mb-4">
+                        <i class="fas fa-palette text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Beautiful Templates</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        Choose from dozens of professionally designed templates that match your restaurant's style.
+                    </p>
+                    <a href="#" class="text-primary hover:underline flex items-center">
+                        Explore templates <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md card-hover-effect animate-fade-in-up" style="animation-delay: 0.1s;">
+                    <div class="w-14 h-14 rounded-xl gradient-bg flex items-center justify-center mb-4">
+                        <i class="fas fa-mobile-alt text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Mobile-Friendly</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        Your menus look perfect on any device, from smartphones to tablets to desktop computers.
+                    </p>
+                    <a href="#" class="text-primary hover:underline flex items-center">
+                        See examples <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md card-hover-effect animate-fade-in-up" style="animation-delay: 0.2s;">
+                    <div class="w-14 h-14 rounded-xl gradient-bg flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-line text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Real-Time Analytics</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        Track menu performance, customer engagement, and popular items with our powerful analytics.
+                    </p>
+                    <a href="#" class="text-primary hover:underline flex items-center">
+                        Learn more <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+                
+                <!-- Feature 4 -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md card-hover-effect animate-fade-in-up" style="animation-delay: 0.3s;">
+                    <div class="w-14 h-14 rounded-xl gradient-bg flex items-center justify-center mb-4">
+                        <i class="fas fa-sync-alt text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Instant Updates</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        Change your menu anytime, anywhere. Updates appear instantly across all platforms.
+                    </p>
+                    <a href="#" class="text-primary hover:underline flex items-center">
+                        How it works <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+                
+                <!-- Feature 5 -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md card-hover-effect animate-fade-in-up" style="animation-delay: 0.4s;">
+                    <div class="w-14 h-14 rounded-xl gradient-bg flex items-center justify-center mb-4">
+                        <i class="fas fa-qrcode text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">QR Code Menus</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        Generate QR codes for contactless menu access. Perfect for post-pandemic dining.
+                    </p>
+                    <a href="#" class="text-primary hover:underline flex items-center">
+                        Get started <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+                
+                <!-- Feature 6 -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md card-hover-effect animate-fade-in-up" style="animation-delay: 0.5s;">
+                    <div class="w-14 h-14 rounded-xl gradient-bg flex items-center justify-center mb-4">
+                        <i class="fas fa-headset text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">24/7 Support</h3>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        Our dedicated support team is always ready to help you with any questions or issues.
+                    </p>
+                    <a href="#" class="text-primary hover:underline flex items-center">
+                        Contact us <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-16">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16 animate-fade-in">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Trusted by Top Restaurants</h2>
+                <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                    Join thousands of restaurants that have transformed their digital presence with MenuGenie
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md card-hover-effect animate-fade-in-up">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
+                            <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Sarah Johnson" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">Sarah Johnson</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Owner, Bistro 42</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        "MenuGenie has completely transformed how we present our menu. Our customers love the interactive features and beautiful design."
+                    </p>
+                    <div class="flex text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 2 -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md card-hover-effect animate-fade-in-up" style="animation-delay: 0.1s;">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
+                            <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="Michael Chen" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">Michael Chen</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Chef, Dragon Palace</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        "Updating our seasonal menu used to take days. Now it takes minutes! The analytics have also helped us optimize our offerings."
+                    </p>
+                    <div class="flex text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                
+                <!-- Testimonial 3 -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-md card-hover-effect animate-fade-in-up" style="animation-delay: 0.2s;">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 rounded-full overflow-hidden mr-4">
+                            <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Elena Rodriguez" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">Elena Rodriguez</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Manager, Café Luna</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        "The QR code feature was a game-changer for us during the pandemic. Customers love the convenience and we love the reduced costs."
+                    </p>
+                    <div class="flex text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-16 gradient-bg">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto text-center text-white animate-fade-in">
+                <h2 class="text-3xl md:text-4xl font-bold mb-6">Ready to Transform Your Menu?</h2>
+                <p class="text-xl mb-8 opacity-90">
+                    Join thousands of restaurants that are delighting customers with beautiful, interactive menus
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <a href="#" class="px-8 py-3 bg-white text-primary rounded-lg font-semibold hover:bg-opacity-90 transition-opacity duration-300">
+                        <i class="fas fa-play-circle mr-2"></i> Watch Demo
+                    </a>
+                    <a href="#" class="px-8 py-3 border-2 border-white text-white rounded-lg font-semibold hover:bg-white hover:bg-opacity-10 transition-colors duration-300">
+                        <i class="fas fa-calendar-alt mr-2"></i> Book a Demo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 py-12 mt-auto">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+                <!-- Company Info -->
+                <div>
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full gradient-bg flex items-center justify-center mr-2">
+                            <i class="fas fa-utensils text-white"></i>
+                        </div>
+                        <span class="text-xl font-semibold text-white">MenuGenie</span>
+                    </div>
+                    <p class="mb-4">
+                        Empowering restaurants with beautiful digital menus since 2020.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors duration-300">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors duration-300">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors duration-300">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors duration-300">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Product Links -->
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4">Product</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-white transition-colors duration-300">Features</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-300">Pricing</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-300">Templates</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-300">Integrations</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-300">Updates</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Resources Links -->
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4">Resources</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-white transition-colors duration-300">Blog</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-300">Help Center</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-300">Tutorials</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-300">Webinars</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-300">Community</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Company Links -->
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4">Company</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-white transition-colors duration-300">About Us</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-300">Careers</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-300">Contact</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-300">Press</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-300">Partners</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p>&copy; 2024 MenuGenie. All rights reserved.</p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a href="#" class="hover:text-white transition-colors duration-300">Privacy Policy</a>
+                    <a href="#" class="hover:text-white transition-colors duration-300">Terms of Service</a>
+                    <a href="#" class="hover:text-white transition-colors duration-300">Cookies</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Dark mode toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        
+        // Check for saved user preference or use system preference
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+        } else {
+            html.classList.remove('dark');
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        });
+        
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Animate elements when they come into view
+        const animateOnScroll = () => {
+            const elements = document.querySelectorAll('.animate-fade-in-up');
+            
+            elements.forEach(element => {
+                const elementPosition = element.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                
+                if (elementPosition < windowHeight - 100) {
+                    element.classList.add('animate-fade-in-up');
+                }
+            });
+        };
+        
+        // Run once on page load
+        animateOnScroll();
+        
+        // Run on scroll
+        window.addEventListener('scroll', animateOnScroll);
+    </script>
+</body>
+</html>

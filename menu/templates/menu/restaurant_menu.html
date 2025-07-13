@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ restaurant.name }} - Menu{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <!-- Restaurant Header -->
+                    <div class="text-center mb-5">
+                        {% if restaurant.image %}
+                            <img src="{{ restaurant.image.url }}" alt="{{ restaurant.name }}" class="img-fluid rounded-circle mb-3" style="max-width: 200px; height: 200px; object-fit: cover;">
+                        {% endif %}
+                        <h1 class="display-4 mb-2">{{ restaurant.name }}</h1>
+                        {% if restaurant.tagline %}
+                            <p class="lead text-muted">{{ restaurant.tagline }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Menu Sections -->
+                    {% for section in sections %}
+                        <div class="menu-section mb-5">
+                            <h2 class="text-center mb-4">{{ section.name }}</h2>
+                            <div class="menu-items">
+                                {% for item in section.items.all %}
+                                    {% if item.is_available %}
+                                        <div class="menu-item mb-4">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h5 class="mb-1">{{ item.name }}</h5>
+                                                    {% if item.description %}
+                                                        <p class="text-muted mb-0">{{ item.description }}</p>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="text-end">
+                                                    <span class="h5 mb-0">₹{{ item.price }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                    <!-- Back Button -->
+                    <div class="text-center mt-4">
+                        <a href="{% url 'menu:manage_restaurant' restaurant.id %}" class="btn btn-outline-primary rounded-pill px-4">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Manage
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .menu-section {
+        background-color: white;
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .menu-item {
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 1rem;
+    }
+    
+    .menu-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .menu-item h5 {
+        color: #2c3e50;
+    }
+
+    .menu-item p {
+        font-size: 0.9rem;
+    }
+</style>
+{% endblock %} 

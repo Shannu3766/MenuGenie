@@ -1,0 +1,644 @@
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.db import IntegrityError
+from django.http import JsonResponse, Http404
+from .models import MenuLink, MenuItem, MenuSection, Restaurant, MenuTemplate
+from .forms import MenuItemForm, MenuSectionForm, MenuUploadForm
+from .utils import extract_menu_data, sync_templates
+import os
+from django.conf import settings
+import json
+from django.core.files.storage import FileSystemStorage
+from django.utils.text import slugify
+
+# Create your views here.
+
+@login_required
+def my_restaurants(request):
+    """
+    Display user's restaurants with template selection functionality
+    """
+    menu_links = MenuLink.objects.filter(user=request.user).select_related('restaurant', 'template')
+    templates = MenuTemplate.objects.filter(is_active=True)
+    
+    return render(request, 'menu/my_restaurants.html', {
+        'menu_links': menu_links,
+        'templates': templates
+    })
+
+@login_required
+def create_restaurant(request):
+    """
+    Create a new restaurant with template selection
+    """
+    if request.method == 'POST':
+        # Existing restaurant creation logic
+        name = request.POST.get('name')
+        tagline = request.POST.get('tagline')
+        image = request.FILES.get('image')
+        template_id = request.POST.get('template')
+        
+        restaurant = Restaurant.objects.create(
+            name=name,
+            tagline=tagline,
+            image=image,
+            user=request.user
+        )
+        
+        template = get_object_or_404(MenuTemplate, id=template_id) if template_id else None
+        
+        MenuLink.objects.create(
+            user=request.user,
+            restaurant=restaurant,
+            template=template
+        )
+        
+        return redirect('menu:my_restaurants')
+    
+    # Get available templates
+    templates = MenuTemplate.objects.filter(is_active=True)
+    return render(request, 'menu/create_restaurant.html', {
+        'templates': templates
+    })
+
+@login_required
+def import_restaurant(request):
+    if request.method == 'POST':
+        restaurant_name = request.POST.get('restaurant_name')
+        if restaurant_name:
+            try:
+                # Create restaurant first
+                restaurant = Restaurant.objects.create(
+                    user=request.user,
+                    name=restaurant_name
+                )
+                
+                # Create menu link
+                MenuLink.objects.create(
+                    user=request.user,
+                    restaurant=restaurant
+                )
+                messages.success(request, 'Restaurant imported successfully!')
+                return redirect('menu:my_restaurants')
+            except IntegrityError:
+                messages.error(request, f'A restaurant named "{restaurant_name}" already exists. Please choose a different name.')
+                return render(request, 'menu/import_restaurant.html')
+    return render(request, 'menu/import_restaurant.html')
+
+@login_required
+def manage_menu(request, menu_id):
+    menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+    
+    # Get all sections for this menu
+    sections = MenuSection.objects.filter(menu=menu_link).order_by('name')
+    
+    # Get all menu items
+    menu_items = MenuItem.objects.filter(menu=menu_link).order_by('section__name', 'name')
+    
+    # Get unsectioned items
+    unsectioned_items = menu_items.filter(section__isnull=True)
+    
+    # Handle menu upload
+    if request.method == 'POST' and 'menu_image' in request.FILES:
+        upload_form = MenuUploadForm(request.POST, request.FILES)
+        if upload_form.is_valid():
+            menu_image = request.FILES['menu_image']
+            print(f"Processing uploaded image: {menu_image.name}")
+            
+            # Save the uploaded image temporarily
+            temp_path = os.path.join(settings.MEDIA_ROOT, 'temp', menu_image.name)
+            os.makedirs(os.path.dirname(temp_path), exist_ok=True)
+            print(f"Saving image to: {temp_path}")
+            
+            with open(temp_path, 'wb+') as destination:
+                for chunk in menu_image.chunks():
+                    destination.write(chunk)
+            
+            print("Image saved successfully, extracting menu data...")
+            # Extract menu data
+            menu_data = extract_menu_data(temp_path)
+            
+            if menu_data:
+                print(f"Successfully extracted menu data: {json.dumps(menu_data, indent=2)}")
+                try:
+                    # Process each section and its items
+                    for section_data in menu_data:
+                        print(f"Processing section: {section_data['section']}")
+                        # Create or get section
+                        section, created = MenuSection.objects.get_or_create(
+                            menu=menu_link,
+                            name=section_data['section']
+                        )
+                        print(f"Section {'created' if created else 'already exists'}")
+                        
+                        # Create items for this section
+                        for item_data in section_data['items']:
+                            print(f"Processing item: {item_data['item']}")
+                            # Extract price (remove currency symbols and convert to float)
+                            price_str = item_data['price'].replace('₹', '').replace('$', '').strip()
+                            try:
+                                price = float(price_str)
+                                print(f"Parsed price: {price}")
+                            except ValueError:
+                                print(f"Could not parse price: {item_data['price']}")
+                                price = 0.0
+                            
+                            # Create menu item
+                            MenuItem.objects.create(
+                                menu=menu_link,
+                                section=section,
+                                name=item_data['item'],
+                                price=price,
+                                quantity=1,  # Set default quantity to 1
+                                is_available=True
+                            )
+                            print(f"Created menu item: {item_data['item']}")
+                    
+                    messages.success(request, 'Menu items extracted and added successfully!')
+                except Exception as e:
+                    print(f"Error processing menu data: {str(e)}")
+                    messages.error(request, f'Error processing menu data: {str(e)}')
+            else:
+                print("Failed to extract menu data from image")
+                messages.error(request, 'Failed to extract menu data from the image.')
+            
+            # Clean up temporary file
+            try:
+                os.remove(temp_path)
+                print("Temporary file cleaned up")
+            except Exception as e:
+                print(f"Error cleaning up temporary file: {str(e)}")
+            
+            return redirect('menu:manage_menu', menu_id=menu_id)
+    else:
+        upload_form = MenuUploadForm()
+    
+    # Handle regular menu item form
+    if request.method == 'POST' and 'name' in request.POST:
+        form = MenuItemForm(request.POST, request.FILES)
+        if form.is_valid():
+            menu_item = form.save(commit=False)
+            menu_item.menu = menu_link
+            menu_item.save()
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Menu item added successfully!'
+            })
+        else:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Error adding menu item.',
+                'errors': form.errors.as_json()
+            }, status=400)
+    else:
+        form = MenuItemForm()
+    
+    # Add section form
+    section_form = MenuSectionForm()
+    
+    return render(request, 'menu/manage_menu.html', {
+        'menu_link': menu_link,
+        'form': form,
+        'section_form': section_form,
+        'upload_form': upload_form,
+        'sections': sections,
+        'menu_items': menu_items,
+        'unsectioned_items': unsectioned_items
+    })
+
+@login_required
+def add_section(request, menu_id):
+    menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+    
+    if request.method == 'POST':
+        form = MenuSectionForm(request.POST)
+        if form.is_valid():
+            section = form.save(commit=False)
+            section.menu = menu_link
+            # Capitalize the section name
+            section.name = section.name.upper()
+            section.save()
+            messages.success(request, 'Section added successfully!')
+        else:
+            messages.error(request, 'Error adding section. Please try again.')
+    
+    return redirect('menu:manage_menu', menu_id=menu_id)
+
+@login_required
+def delete_menu_item(request, menu_id, item_id):
+    if request.method == 'POST':
+        menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+        menu_item = get_object_or_404(MenuItem, id=item_id, menu=menu_link)
+        menu_item.delete()
+        messages.success(request, 'Menu item deleted successfully!')
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+@login_required
+def toggle_availability(request, menu_id, item_id):
+    if request.method == 'POST':
+        menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+        menu_item = get_object_or_404(MenuItem, id=item_id, menu=menu_link)
+        menu_item.is_available = not menu_item.is_available
+        menu_item.save()
+        status = 'available' if menu_item.is_available else 'unavailable'
+        messages.success(request, f'Menu item is now {status}!')
+        return JsonResponse({
+            'status': 'success',
+            'is_available': menu_item.is_available
+        })
+    return JsonResponse({'status': 'error'}, status=400)
+
+@login_required
+def edit_menu_item(request, menu_id, item_id):
+    menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+    menu_item = get_object_or_404(MenuItem, id=item_id, menu=menu_link)
+    
+    if request.method == 'POST':
+        form = MenuItemForm(request.POST, request.FILES, instance=menu_item)
+        if form.is_valid():
+            updated_item = form.save()
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Menu item updated successfully!',
+                'item': {
+                    'id': updated_item.id,
+                    'name': updated_item.name,
+                    'description': updated_item.description,
+                    'price': str(updated_item.price),
+                    'quantity': updated_item.quantity,
+                    'is_available': updated_item.is_available,
+                    'photo_url': updated_item.photo.url if updated_item.photo else None,
+                    'section_id': updated_item.section.id if updated_item.section else None,
+                }
+            })
+        else:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Error updating menu item.',
+                'errors': form.errors.as_json()
+            }, status=400)
+    else:
+        form = MenuItemForm(instance=menu_item)
+    
+    return render(request, 'menu/edit_menu_item.html', {
+        'form': form,
+        'menu_link': menu_link
+    })
+
+def public_menu(request, user_id, restaurant_name):
+    # First try exact match
+    menu_link = MenuLink.objects.select_related('restaurant', 'template').filter(
+        user_id=user_id,
+        restaurant__name__iexact=restaurant_name
+    ).first()
+    
+    # If not found, try matching the slugified version
+    if not menu_link:
+        from django.utils.text import slugify
+        menu_link = MenuLink.objects.select_related('restaurant', 'template').filter(
+            user_id=user_id
+        ).first()
+        if menu_link and slugify(menu_link.restaurant.name) == restaurant_name:
+            pass  # We found a match
+        else:
+            menu_link = None
+    
+    if not menu_link:
+        raise Http404("No MenuLink matches the given query.")
+    
+    # Prepare menu data with the structure expected by the templates
+    menu = {
+        'restaurant': menu_link.restaurant,
+        'sections': []
+    }
+    
+    # Add sections and their items
+    for section in menu_link.sections.all().order_by('name'):
+        section_data = {
+            'name': section.name,
+            'items': []
+        }
+        # Use the reverse relationship to get items
+        for item in MenuItem.objects.filter(menu=menu_link, section=section).order_by('name'):
+            section_data['items'].append({
+                'name': item.name,
+                'description': item.description,
+                'price': item.price,
+                'photo': item.photo
+            })
+        menu['sections'].append(section_data)
+    
+    # Render using the template from the templates subdirectory
+    return render(request, f'menu/templates/{menu_link.template.template_file}', {
+        'menu': menu
+    })
+
+@login_required
+def delete_section(request, menu_id, section_id):
+    if request.method == 'POST':
+        menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+        section = get_object_or_404(MenuSection, id=section_id, menu=menu_link)
+        
+        # Get all items in this section
+        items = MenuItem.objects.filter(section=section)
+        
+        # Delete all items in the section
+        items.delete()
+        
+        # Delete the section
+        section.delete()
+        
+        messages.success(request, 'Section and all its items deleted successfully!')
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+@login_required
+def toggle_section_availability(request, menu_id, section_id):
+    if request.method == 'POST':
+        menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+        section = get_object_or_404(MenuSection, id=section_id, menu=menu_link)
+        action = request.POST.get('action', 'available')
+        
+        # Update all items in the section
+        MenuItem.objects.filter(menu=menu_link, section=section).update(
+            is_available=(action == 'available')
+        )
+        
+        status = 'available' if action == 'available' else 'unavailable'
+        messages.success(request, f'All items in section "{section.name}" are now {status}!')
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+@login_required
+def delete_restaurant(request, menu_id):
+    menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+    
+    if request.method == 'POST':
+        # Delete the restaurant image if it exists
+        if menu_link.restaurant and menu_link.restaurant.image:
+            # Delete the image file from storage
+            if os.path.isfile(menu_link.restaurant.image.path):
+                os.remove(menu_link.restaurant.image.path)
+        
+        # Delete the menu link and related objects
+        menu_link.delete()
+        messages.success(request, 'Restaurant deleted successfully.')
+        return redirect('menu:my_restaurants')
+    
+    return render(request, 'menu/delete_restaurant.html', {'menu_link': menu_link})
+
+@login_required
+def edit_restaurant(request, menu_id):
+    menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+    
+    if request.method == 'POST':
+        restaurant_name = request.POST.get('restaurant_name')
+        restaurant_tagline = request.POST.get('restaurant_tagline')
+        restaurant_image = request.FILES.get('restaurant_image')
+        
+        if not restaurant_name:
+            messages.error(request, 'Restaurant name is required.')
+            return render(request, 'menu/edit_restaurant.html', {'menu_link': menu_link})
+        
+        # Check if restaurant name already exists (excluding current restaurant)
+        if Restaurant.objects.filter(name=restaurant_name).exclude(id=menu_link.restaurant.id).exists():
+            messages.error(request, 'A restaurant with this name already exists.')
+            return render(request, 'menu/edit_restaurant.html', {'menu_link': menu_link})
+        
+        # Update restaurant
+        menu_link.restaurant.name = restaurant_name
+        menu_link.restaurant.tagline = restaurant_tagline
+        if restaurant_image:
+            menu_link.restaurant.image = restaurant_image
+        menu_link.restaurant.save()
+        
+        messages.success(request, 'Restaurant updated successfully!')
+        return redirect('menu:my_restaurants')
+    
+    return render(request, 'menu/edit_restaurant.html', {'menu_link': menu_link})
+
+@login_required
+def change_template(request, menu_id):
+    """
+    Change the template for an existing menu
+    """
+    if request.method == 'POST':
+        menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+        template_id = request.POST.get('template')
+        
+        if template_id:
+            template = get_object_or_404(MenuTemplate, id=template_id)
+            menu_link.template = template
+            menu_link.save()
+            
+            messages.success(request, 'Template updated successfully!')
+            return redirect('menu:my_restaurants')
+    
+    messages.error(request, 'Invalid request')
+    return redirect('menu:my_restaurants')
+
+@login_required
+def template_preview(request, template_id):
+    """
+    Preview a menu template with actual menu data if available, otherwise use sample data
+    """
+    template = get_object_or_404(MenuTemplate, id=template_id)
+    menu_id = request.GET.get('menu_id')
+    
+    if menu_id:
+        # Get actual menu data
+        menu_link = get_object_or_404(MenuLink, id=menu_id, user=request.user)
+        menu = {
+            'restaurant': menu_link.restaurant,
+            'sections': []
+        }
+        
+        # Add sections and their items
+        for section in menu_link.sections.all().order_by('name'):
+            section_data = {
+                'name': section.name,
+                'items': []
+            }
+            # Use the reverse relationship to get items
+            for item in MenuItem.objects.filter(menu=menu_link, section=section).order_by('name'):
+                section_data['items'].append({
+                    'name': item.name,
+                    'description': item.description,
+                    'price': item.price,
+                    'photo': item.photo
+                })
+            menu['sections'].append(section_data)
+    else:
+        # Use sample data if no menu_id provided
+        menu = {
+            'restaurant': {
+                'name': 'Sample Restaurant',
+                'tagline': 'Delicious Food & Drinks',
+                'image': None
+            },
+            'sections': [
+                {
+                    'name': 'Appetizers',
+                    'items': [
+                        {
+                            'name': 'Bruschetta',
+                            'description': 'Toasted bread topped with fresh tomatoes, basil, and garlic',
+                            'price': '8.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Calamari',
+                            'description': 'Crispy fried squid served with marinara sauce',
+                            'price': '12.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Spinach Artichoke Dip',
+                            'description': 'Creamy dip with spinach, artichokes, and melted cheese',
+                            'price': '10.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Stuffed Mushrooms',
+                            'description': 'Mushroom caps filled with herbed breadcrumbs and cheese',
+                            'price': '9.99',
+                            'photo': None
+                        }
+                    ]
+                },
+                {
+                    'name': 'Main Courses',
+                    'items': [
+                        {
+                            'name': 'Grilled Salmon',
+                            'description': 'Fresh salmon fillet with lemon butter sauce',
+                            'price': '24.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Beef Tenderloin',
+                            'description': '8oz tenderloin with red wine reduction',
+                            'price': '29.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Chicken Marsala',
+                            'description': 'Chicken breast in marsala wine sauce with mushrooms',
+                            'price': '22.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Vegetable Risotto',
+                            'description': 'Creamy arborio rice with seasonal vegetables',
+                            'price': '19.99',
+                            'photo': None
+                        }
+                    ]
+                },
+                {
+                    'name': 'Pasta',
+                    'items': [
+                        {
+                            'name': 'Fettuccine Alfredo',
+                            'description': 'Fresh pasta in creamy parmesan sauce',
+                            'price': '16.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Spaghetti Carbonara',
+                            'description': 'Classic pasta with pancetta and egg sauce',
+                            'price': '17.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Lasagna',
+                            'description': 'Layers of pasta, meat sauce, and cheese',
+                            'price': '18.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Penne Arrabbiata',
+                            'description': 'Spicy tomato sauce with garlic and chili',
+                            'price': '15.99',
+                            'photo': None
+                        }
+                    ]
+                },
+                {
+                    'name': 'Desserts',
+                    'items': [
+                        {
+                            'name': 'Tiramisu',
+                            'description': 'Classic Italian dessert with coffee and mascarpone',
+                            'price': '8.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Chocolate Lava Cake',
+                            'description': 'Warm chocolate cake with molten center',
+                            'price': '9.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'New York Cheesecake',
+                            'description': 'Creamy cheesecake with berry compote',
+                            'price': '7.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Crème Brûlée',
+                            'description': 'Classic vanilla custard with caramelized sugar',
+                            'price': '8.99',
+                            'photo': None
+                        }
+                    ]
+                },
+                {
+                    'name': 'Beverages',
+                    'items': [
+                        {
+                            'name': 'Fresh Lemonade',
+                            'description': 'House-made lemonade with mint',
+                            'price': '4.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Iced Tea',
+                            'description': 'Fresh brewed black tea with lemon',
+                            'price': '3.99',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Sparkling Water',
+                            'description': 'Carbonated water with choice of flavor',
+                            'price': '3.49',
+                            'photo': None
+                        },
+                        {
+                            'name': 'Fresh Fruit Smoothie',
+                            'description': 'Blend of seasonal fruits and yogurt',
+                            'price': '5.99',
+                            'photo': None
+                        }
+                    ]
+                }
+            ]
+        }
+    
+    # Get the template content
+    template_path = os.path.join(settings.BASE_DIR, 'menu', 'templates', 'menu', 'templates', template.template_file)
+    with open(template_path, 'r') as f:
+        template_content = f.read()
+    
+    # Create response with appropriate headers
+    response = render(request, f'menu/templates/{template.template_file}', {
+        'menu': menu,
+        'is_preview': True
+    })
+    
+    # Allow the page to be displayed in an iframe
+    response['X-Frame-Options'] = 'SAMEORIGIN'
+    
+    return response
