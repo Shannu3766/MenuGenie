@@ -11,6 +11,20 @@ MenuGenie is a Django-based web application for restaurant owners to digitize an
 - Add, edit, and delete menu items and sections
 - Public and private menu views
 
+## Screenshots
+
+### Home Page
+![Home Page](Photos/home.jpeg)
+
+### Restaurant Page
+![Restaurant Page](Photos/restaurent_page.jpeg)
+
+### Live Menu
+![Live Menu](Photos/livemenu.jpeg)
+
+### Template Change
+![Template Change](Photos/change_template.jpeg)
+
 ## Technology Stack
 - Python 3.x
 - Django 5.2.3
